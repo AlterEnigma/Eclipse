@@ -1,0 +1,20 @@
+{
+	"embeds": [{
+		"color": 16733952,
+		"author": {
+			"name": "/r/<<<{{Subreddit}}>>>",
+			"url": "[SUBREDDIT URL GOES HERE]",
+			"icon_url": "[IMAGE URL GOES HERE]"
+		},
+		"title": "{{Title}}",
+		"url": "<<<{{PostURL}}>>>",
+		"description": "<<<{{Content}}>>>",
+		"image": {
+			"url": "{{ImageURL}}"
+		},
+		"footer": {
+			"text": "Reddit • /u/<<<{{Author}}>>> • <<<{{PostedAt}}>>>",
+			"icon_url": "https://i.imgur.com/abUrCSj.png"
+		}
+	}]
+}
