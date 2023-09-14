@@ -1,0 +1,19 @@
+{
+"embeds": [{
+    "color": 38650,
+    "author": {
+        "name": "{{EntryAuthor}}",
+        "url": "https://www.pixiv.net/en/users/16582456",
+        "icon_url": "https://pbs.twimg.com/profile_images/1618138356369756160/YtF2mMP4_400x400.jpg"
+    },
+    "title": "{{EntryTitle}}",
+    "url": "{{EntryUrl}}",
+    "image": {
+        "url": "{{EntryImageUrl}}"
+    },
+    "footer": {
+        "text": "Pixiv • {{EntryPublished}}",
+        "icon_url": "https://i.imgur.com/jckoLce.png"
+    }
+}]
+}
