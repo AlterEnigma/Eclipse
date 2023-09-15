@@ -1,0 +1,19 @@
+{
+"embeds": [{
+    "color": 38650,
+    "author": {
+        "name": "{{EntryAuthor}}",
+        "url": "https://www.pixiv.net/en/users/44781013",
+        "icon_url": "https://i.imgur.com/GtoimBc.png"
+    },
+    "title": "{{EntryTitle}}",
+    "url": "{{EntryUrl}}",
+    "image": {
+        "url": "{{EntryImageUrl}}"
+    },
+    "footer": {
+        "text": "Pixiv • {{EntryPublished}}",
+        "icon_url": "https://i.imgur.com/jckoLce.png"
+    }
+}]
+}
