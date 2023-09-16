@@ -11,10 +11,10 @@ var body = {
     {
       color: 14837107,
       author: {
-        name: 'Azur Lane',
-        url: 'https://azurlane.yo-star.com',
+        name: 'Arknights',
+        url: 'https://www.arknights.global/',
         icon_url:
-          'https://pbs.twimg.com/profile_images/1651413354660130817/K9iOcejt_400x400.jpg',
+          'https://pbs.twimg.com/profile_images/1265563742626107392/zjjzBeIs_400x400.jpg',
       },
       title: Feed.newFeedItem.EntryTitle,
       url: Feed.newFeedItem.EntryUrl,
