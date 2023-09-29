@@ -1,11 +1,23 @@
 // TypeScript v2.92
 let imageURL = Feed.newFeedItem.EntryImageUrl;
-let noImage = 'no_image_card.png';
+let noImage = "no_image_card.png";
+
 let regex_pattern = /@/i;
-var iconUrl_init = String.prototype.concat('https://avatar-resolver.vercel.app/twitter/', Feed.newFeedItem.EntryAuthor);
-var iconUrl_final = iconUrl_init.replace(regex_pattern, '');
-var name_init = String.prototype.concat('chaesu👟 (', Feed.newFeedItem.EntryAuthor, ')');
-var text_init = String.prototype.concat('Twitter • ', Feed.newFeedItem.EntryPublished);
+var iconUrl_init = String.prototype.concat(
+  "https://avatar-resolver.vercel.app/twitter/",
+  Feed.newFeedItem.EntryAuthor
+);
+var iconUrl_final = iconUrl_init.replace(regex_pattern, "");
+var name_init = String.prototype.concat(
+  "chaesu👟 (",
+  Feed.newFeedItem.EntryAuthor,
+  ")"
+);
+var text_init = String.prototype.concat(
+  "Twitter • ",
+  Feed.newFeedItem.EntryPublished
+);
+
 var body = {
   embeds: [
     {
@@ -21,7 +33,7 @@ var body = {
       },
       footer: {
         text: text_init,
-        icon_url: 'https://i.imgur.com/s2qjM73.png',
+        icon_url: "https://i.imgur.com/s2qjM73.png",
       },
     },
   ],
