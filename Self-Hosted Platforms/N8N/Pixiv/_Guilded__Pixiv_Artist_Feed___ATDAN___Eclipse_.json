@@ -1,0 +1,198 @@
+{
+  "name": "(Guilded) Pixiv Artist Feed - ATDAN- [Eclipse]",
+  "nodes": [
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyHour"
+            }
+          ]
+        },
+        "feedUrl": "https://rsshub.app/pixiv/user/6662895"
+      },
+      "id": "15a167bb-bced-4709-be9d-9678b73812fb",
+      "name": "RSS Feed Trigger",
+      "type": "n8n-nodes-rss-feed-trigger.rssFeedTrigger",
+      "typeVersion": 1,
+      "position": [
+        500,
+        600
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "function convertTimestamp(inputTimestamp) {\n  const dateObj = new Date(inputTimestamp);\n  const options = {\n    weekday: 'short',\n    day: '2-digit',\n    month: 'short',\n    year: 'numeric',\n    hour: '2-digit',\n    minute: '2-digit',\n    second: '2-digit',\n    timeZone: 'GMT',\n    timeZoneName: 'short',\n  };\n  return dateObj.toLocaleString('en-US', options);\n}\n\n\nconst inputTimestamp = $('RSS Feed Trigger').item.json.pubDate;\nconst convertedTimestamp = convertTimestamp(inputTimestamp);\nconst inputData = $('RSS Feed Trigger').item.json.content;\n// Regex pattern to match the <img src> URL\nconst regex = /<img[^>]+src=\"([^\">]+)\"/g;\nconst imgSrcUrls = [];\nlet match;\n// Extract all <img src> URLs using regex\nwhile ((match = regex.exec(inputData)) !== null) {\n  imgSrcUrls.push(match[1]);\n}\nconst convertedUrls = imgSrcUrls.map((url, index) => {\n  return url;\n});\n\n\nconst maxEmbeds = 10; // Maximum number of embeds to send\nconst totalEmbeds = convertedUrls.length;\nconst numMessages = Math.ceil(totalEmbeds / maxEmbeds);\nconst payloads = [];\n\n\nfor (let i = 0; i < numMessages; i++) {\n  const start = i * maxEmbeds;\n  const end = start + maxEmbeds;\n  const embeds = convertedUrls\n    .slice(start, end)\n    .map((url, index) => {\n      const entryNumber = start + index + 1; // Entry number starts from 1\n      let titleInit = $('RSS Feed Trigger').item.json.title;\n      if (convertedUrls.length > 1) {\n        titleInit = `${titleInit} [${entryNumber}]`;\n      }\n      return {\n        color: 40191,\n        author: {\n          name: $('RSS Feed Trigger').item.json.author,\n          url: 'https://www.pixiv.net/en/users/6662895',\n          icon_url: 'https://pbs.twimg.com/profile_images/1201092432797954048/9wIdUsoF_400x400.jpg',\n        },\n        title: titleInit,\n        url: $('RSS Feed Trigger').item.json.link,\n        image: {\n          url: url,\n        },\n        footer: {\n          text: String.prototype.concat('Pixiv • ', convertedTimestamp),\n          icon_url: 'https://i.imgur.com/jckoLce.png',\n        },\n      };\n    });\n  const body = { embeds };\n  payloads.push({ body });\n}\n\n\nreturn { payloads };"
+      },
+      "id": "aa056e4c-d66f-4f68-a20e-c435263b0714",
+      "name": "Code",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 1,
+      "position": [
+        720,
+        600
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://media.guilded.gg/webhooks/REDACTED",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ $json.payloads[0].body }}",
+        "options": {}
+      },
+      "id": "609920b7-5787-427d-906e-fb443c68259c",
+      "name": "HTTP Request",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        1160,
+        600
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://media.guilded.gg/webhooks/REDACTED",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ $json.payloads[1].body }}",
+        "options": {}
+      },
+      "id": "18aa89a8-3113-4714-bcf8-3ad4cfcbe6be",
+      "name": "HTTP Request1",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        1160,
+        780
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "string": [
+            {
+              "value1": "={{ $json.payloads[1] }}",
+              "operation": "isNotEmpty"
+            }
+          ]
+        }
+      },
+      "id": "11dddf3c-be97-40ab-b2ad-739794012a43",
+      "name": "IF",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [
+        920,
+        720
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "string": [
+            {
+              "value1": "={{ $json.payloads[2] }}",
+              "operation": "isNotEmpty"
+            }
+          ]
+        }
+      },
+      "id": "82ad3ab5-30ca-41f5-a170-6756166d87aa",
+      "name": "IF1",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [
+        920,
+        880
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://media.guilded.gg/webhooks/REDACTED",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ $json.payloads[2].body }}",
+        "options": {}
+      },
+      "id": "3f0e95d5-f09c-4147-aa1d-5af28641c5a6",
+      "name": "HTTP Request2",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        1160,
+        960
+      ]
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "RSS Feed Trigger": {
+      "main": [
+        [
+          {
+            "node": "Code",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "IF",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "IF1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "IF": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "IF1": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {},
+  "versionId": "89df1bdb-ebe5-4909-b2d8-9fbf95e0f18b",
+  "id": "58",
+  "meta": {
+    "instanceId": "44672d136b69a9f884e82f8d1a8bbe4977cb5c17b49f43a8860b3387f151c69c"
+  },
+  "tags": []
+}
