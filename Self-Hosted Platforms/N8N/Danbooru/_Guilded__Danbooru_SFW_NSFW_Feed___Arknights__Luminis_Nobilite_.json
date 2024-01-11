@@ -1,5 +1,5 @@
 {
-  "name": "(Guilded) Danbooru SFW/NSFW Feed - Azur Lane [Eclipse]",
+  "name": "(Guilded) Danbooru SFW/NSFW Feed - Arknights [Luminis Nobilite]",
   "nodes": [
     {
       "parameters": {
@@ -22,7 +22,7 @@
         },
         "options": {}
       },
-      "id": "e02b8b87-21f1-4d2e-b2f4-09b6fa9b58a1",
+      "id": "81e38e9b-aab9-446b-92e2-c64a7ed72504",
       "name": "HTTP Request",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.1,
@@ -35,7 +35,7 @@
       "parameters": {
         "options": {}
       },
-      "id": "25094fee-f6fa-4de9-95e0-444f155050e9",
+      "id": "34772a04-aca2-414f-bdd1-fce45e0ff257",
       "name": "XML",
       "type": "n8n-nodes-base.xml",
       "typeVersion": 1,
@@ -49,7 +49,7 @@
         "url": "={{ $json.items }}",
         "options": {}
       },
-      "id": "518cdcfd-8c50-4f14-8e29-e4f4f73063af",
+      "id": "9f67d363-f2c4-4da5-9faa-3b323bf7934c",
       "name": "Danbooru API - Post URL",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.1,
@@ -74,7 +74,7 @@
         },
         "options": {}
       },
-      "id": "ebe7f354-363b-462e-a5da-f4a95da287a3",
+      "id": "4a203d26-244f-4bc6-b13c-2ab7f5ee05da",
       "name": "HTML - Extract OG Image URL",
       "type": "n8n-nodes-base.html",
       "typeVersion": 1,
@@ -85,10 +85,10 @@
     },
     {
       "parameters": {
-        "url": "https://danbooru.donmai.us/posts.atom?tags=azur_lane",
+        "url": "https://danbooru.donmai.us/posts.atom?tags=arknights",
         "options": {}
       },
-      "id": "20f441ba-c6bd-44bd-9c67-e905af1197a4",
+      "id": "3659c763-0cc6-4101-9034-902145cb938f",
       "name": "Danbooru API HTTP Request - Atom Feed",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.1,
@@ -102,7 +102,7 @@
         "url": "={{ $json.ogImage }}",
         "options": {}
       },
-      "id": "1e45401e-1f20-4ac4-a1bc-bbde1ef21805",
+      "id": "7b49db34-8bb3-4f88-9d8c-ef829ec0d1e7",
       "name": "Danbooru CDN API - Image Binary Data",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.1,
@@ -113,9 +113,9 @@
     },
     {
       "parameters": {
-        "jsCode": "function convertTimestamp(inputTimestamp) {\n  const dateObj = new Date(inputTimestamp);\n  const options = { weekday: 'short', day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit', timeZone: 'GMT', timeZoneName: 'short' };\n  return dateObj.toLocaleString('en-US', options);\n}\n\nconst entries = $('Merge').item.json['filteredEntries'];\n\nconst payloads = [];\n\nfor (let i = 0; i < entries.length; i++) {\n  const item = $('Set').item.json.fileNameProperty[i];\n  if (item && item.fileNameData && item.fileNameData.fileName) {\n    const fileName = item.fileNameData.fileName;\n    const entry = entries[i];\n    const inputTimestamp = entry.updated;\n    const authorName = entry.author.name;\n    const convertedTimestamp = convertTimestamp(inputTimestamp);\n\n    const payload = {\n      embeds: [],\n    };\n\n    const embed = {\n      color: 11438438,\n      author: {\n        name: 'Azur Lane',\n        url: 'https://azurlane.yo-star.com/',\n        icon_url: 'https://play-lh.googleusercontent.com/9QTLYD2_Jd6OIKHwRHkEBnFAgPmVKJwf2xmHjzPk-5w0SRLZumsCoQZGlO8d_kB3Gdld',\n      },\n      title: entry.title,\n      url: entry.id,\n      image: {\n        url: `attachment://${fileName}`,\n      },\n      footer: {\n        text: `Danbooru • ${convertedTimestamp} • ${authorName || ''}`,\n        icon_url: 'https://avatars.githubusercontent.com/u/57931572?s=280&v=4',\n      },\n    };\n\n    const itemPayload = {\n      itemPayload: {embeds: [embed],\n      },\n    };\n\n    payloads.push(itemPayload);\n  }\n}\n\nreturn payloads;"
+        "jsCode": "function convertTimestamp(inputTimestamp) {\n  const dateObj = new Date(inputTimestamp);\n  const options = { weekday: 'short', day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit', timeZone: 'GMT', timeZoneName: 'short' };\n  return dateObj.toLocaleString('en-US', options);\n}\n\nconst entries = $('Merge').item.json['filteredEntries'];\n\nconst payloads = [];\n\nfor (let i = 0; i < entries.length; i++) {\n  const item = $('Set').item.json.fileNameProperty[i];\n  if (item && item.fileNameData && item.fileNameData.fileName) {\n    const fileName = item.fileNameData.fileName;\n    const entry = entries[i];\n    const inputTimestamp = entry.updated;\n    const authorName = entry.author.name;\n    const convertedTimestamp = convertTimestamp(inputTimestamp);\n\n    const payload = {\n      embeds: [],\n    };\n\n    const embed = {\n      color: 11438438,\n      author: {\n        name: 'Arknights',\n        url: 'https://www.arknights.global/',\n        icon_url: 'https://64.media.tumblr.com/8ac3f1dcf790017938fbba3a20325683/834e0c84b0c2413f-86/s400x600/98ac3ff1e9c1724fe4c7f7eae7c9d46de5981a48.pnj',\n      },\n      title: entry.title,\n      url: entry.id,\n      image: {\n        url: `attachment://${fileName}`,\n      },\n      footer: {\n        text: `Danbooru • ${convertedTimestamp} • ${authorName || ''}`,\n        icon_url: 'https://avatars.githubusercontent.com/u/57931572?s=280&v=4',\n      },\n    };\n\n    const itemPayload = {\n      itemPayload: {embeds: [embed],\n      },\n    };\n\n    payloads.push(itemPayload);\n  }\n}\n\nreturn payloads;"
       },
-      "id": "97860297-2e2e-431f-b063-94c3c272bc18",
+      "id": "251d69ee-d93a-47c3-a156-c8d6a3864e39",
       "name": "Main Driver Code",
       "type": "n8n-nodes-base.code",
       "typeVersion": 1,
@@ -132,7 +132,7 @@
           "includeUnpaired": true
         }
       },
-      "id": "f5ce8822-ad1e-484b-9c16-01324677f46b",
+      "id": "942bf4db-b987-44c2-a7ba-a4465b347a91",
       "name": "Merge - Binary Data Branch",
       "type": "n8n-nodes-base.merge",
       "typeVersion": 2.1,
@@ -152,7 +152,7 @@
           ]
         }
       },
-      "id": "3f0af3f8-f938-4ff3-9f36-acf9e03d66f2",
+      "id": "46f8caab-1e05-4ab7-b861-0da19c1b6a10",
       "name": "Schedule Trigger",
       "type": "n8n-nodes-base.scheduleTrigger",
       "typeVersion": 1,
@@ -165,7 +165,7 @@
       "parameters": {
         "jsCode": "const workflowStaticData = $getWorkflowStaticData('global');\nconst lastExecution =  workflowStaticData.lastExecution;\nworkflowStaticData.lastExecution = new Date().getTime();\nconst filteredEntries = [];\n\nfor (let item of items) {\n  const entries = item.json.feed.entry;\n\n  for (let entry of entries) {\n    const entryTimestamp = new Date(entry.updated).getTime();\n\n    if (entryTimestamp > lastExecution) {\n      // Perform your desired action for entries that are after the last execution\n      // For example, you can add them to the filteredEntries array or send them to the next node in the workflow\n\n      filteredEntries.push(entry);\n    }\n  }\n}\n\nreturn { filteredEntries };\n"
       },
-      "id": "45563183-e3ae-4ca7-9648-d45c8ff8339f",
+      "id": "9a1edfca-36db-40c1-a0a3-0c0be522abaa",
       "name": "Entry Index Filter Code",
       "type": "n8n-nodes-base.code",
       "typeVersion": 1,
@@ -179,7 +179,7 @@
         "fieldToSplitOut": "items",
         "options": {}
       },
-      "id": "8d3763e7-dcac-49e8-8a7b-8b17252cfb34",
+      "id": "3fd0c602-b900-473b-b153-2b325221d8d5",
       "name": "Item Lists",
       "type": "n8n-nodes-base.itemLists",
       "typeVersion": 2.1,
@@ -193,7 +193,7 @@
         "mode": "runOnceForEachItem",
         "jsCode": "const items = $json['filteredEntries'].map(entry => entry['link'][0]['href']);\n\nreturn { items };"
       },
-      "id": "fdaf14be-7646-4ca0-88c1-476ec5bf6903",
+      "id": "01d43a66-624f-4b51-ad21-9b69283e0cbf",
       "name": "Return All Danbooru Post URLs",
       "type": "n8n-nodes-base.code",
       "typeVersion": 1,
@@ -206,7 +206,7 @@
       "parameters": {
         "jsCode": "let results = [];\n\nfor (items of items) {\n    for (key of Object.keys(items.binary)) {\n        results.push({\n            fileNameData: {\n                fileName: items.binary[key].fileName\n            }\n        });\n    }\n}\n\nreturn { results };"
       },
-      "id": "95482ddc-d16b-48d6-9d47-e7be3ef9197f",
+      "id": "b62e4ab5-bcab-4170-be21-e0ffe69de6a4",
       "name": "Code",
       "type": "n8n-nodes-base.code",
       "typeVersion": 1,
@@ -230,7 +230,7 @@
           "dotNotation": true
         }
       },
-      "id": "a0ca8621-2c71-409c-b279-e9691bb39339",
+      "id": "d365e637-b328-4d5d-8bf1-8451034c8301",
       "name": "Set",
       "type": "n8n-nodes-base.set",
       "typeVersion": 2,
@@ -247,7 +247,7 @@
           "includeUnpaired": true
         }
       },
-      "id": "31d03024-023b-4137-8040-e2c0c1929bf2",
+      "id": "8d02a154-3aae-4038-8f10-e588d202735c",
       "name": "Merge",
       "type": "n8n-nodes-base.merge",
       "typeVersion": 2.1,
@@ -424,17 +424,17 @@
       ]
     }
   },
-  "active": true,
+  "active": false,
   "settings": {
     "saveDataSuccessExecution": "none",
     "saveManualExecutions": false,
     "callerPolicy": "workflowsFromSameOwner",
     "saveDataErrorExecution": "none"
   },
-  "versionId": "15d298d8-5e6d-48d2-9346-4f1bdc1e9012",
-  "id": "66",
+  "versionId": "548a6cee-7b3e-4748-bdbb-7dfbc5d5233e",
+  "id": "62",
   "meta": {
-    "instanceId": "44672d136b69a9f884e82f8d1a8bbe4977cb5c17b49f43a8860b3387f151c69c"
+    "instanceId": "f3e8646dc25bb703680f7fd48308e56289d71dc10dc3ea0c5d57254342b6a676"
   },
   "tags": []
 }
