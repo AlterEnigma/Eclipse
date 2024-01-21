@@ -1,0 +1,94 @@
+{
+  "name": "(Guilded) Twitter Artist Feed - CHIARA爱東東 @CHIARA63710634 [Luminis Nobilite]",
+  "nodes": [
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "const regexPattern = /@/i;\nconst creator = $('RSS Feed Trigger').item.json.creator;\nconst iconUrl = \"https://unavatar.io/twitter/CHIARA63710634?fallback=https://raw.githubusercontent.com/AlterEnigma/Eclipse/main/Assets/Twitter/Twitter%20Artist%20Feeds/Avatars/%40CHIARA63710634_400x400.jpg\";\nconst inputContent = $('RSS Feed Trigger').item.json.content;\nconst regex = /<img\\s+[^>]*src=\"([^\"]+)\"[^>]*>/g;\nconst match = regex.exec(inputContent);\nconst nameInit = `CHIARA爱東東 (${creator})`;\nconst textInit = `Twitter • ${$('RSS Feed Trigger').item.json.pubDate}`;\n\nlet descriptionHyperlinked = $('RSS Feed Trigger').item.json['title'];\n// Use a regular expression to search for URLs within the description field\nconst urlRegex = /(https?:\\/\\/[^\\s]+)/g;\ndescriptionHyperlinked = descriptionHyperlinked.replace(urlRegex, '[$1]($1)');\n// Regular expression pattern to match hashtags\nconst hashtagRegex = /(^|\\s)(#[^\\s]+)/g;\n// Find all the hashtags in the description string\nconst hashtags = descriptionHyperlinked.match(hashtagRegex);\n// Replace the hashtags with URLs\nif (hashtags) {\n  hashtags.forEach(hashtag => {\n    const cleanHashtag = hashtag.substring(1); // Remove the '#' symbol\n    const hashtagUrl = `https://www.twitter.com/hashtag/${cleanHashtag.toLowerCase().replace('#', '')}`;\n    const hashtagLink = `[${hashtag}](${hashtagUrl})`; // Include the '#' symbol\n    descriptionHyperlinked = descriptionHyperlinked.replace(hashtag, `${hashtagLink}`);\n  });\n}\n\n// Regular expression pattern to match @ mentions\nconst mentionRegex = /(^|\\s)@(\\w+)/g;\n// Find all the @ mentions in the description string\nconst mentions = descriptionHyperlinked.match(mentionRegex);\n// Replace the @ mentions with URLs\nif (mentions) {\n  mentions.forEach(mention => {\n    const mentionWithoutSpace = mention.replace(/\\s/g, ''); // Remove any spaces before the mention\n    const username = mentionWithoutSpace.substring(1);\n    const mentionUrl = `https://twitter.com/${username}`;\n    const mentionLink = ` [@${username}](${mentionUrl})`; // Include the '@' symbol\n    descriptionHyperlinked = descriptionHyperlinked.replace(mention, mentionLink);\n  });\n}\n\n\nif (match && match[1]) {\n  const imgSrc = match[1];\n  let embed = {\n    color: 1942002,\n    author: {\n      name: nameInit,\n      url: $(\"RSS Feed Trigger\").item.json.link,\n      icon_url: iconUrl,\n    },\n    url: $(\"RSS Feed Trigger\").item.json['link'],\n    image: {\n      url: imgSrc,\n    },\n    footer: {\n      text: textInit,\n      icon_url: 'https://i.imgur.com/s2qjM73.png',\n    },\n  };\n    embed.description = descriptionHyperlinked;\n  const body = {\n    embeds: [embed],\n  };\n  return { body };\n} else {\n  let embed = {\n     color: 1942002,\n    author: {\n      name: nameInit,\n      url: $(\"RSS Feed Trigger\").item.json.link,\n      icon_url: iconUrl,\n    },\n    url: $(\"RSS Feed Trigger\").item.json['link'],\n    footer: {\n      text: textInit,\n      icon_url: 'https://i.imgur.com/s2qjM73.png',\n    },\n  };\n  embed.description = descriptionHyperlinked;\n  const body = {\n    embeds: [embed],\n  };\n  return { body };\n}"
+      },
+      "id": "ad187d0e-ae92-42e9-a297-f035055e42fe",
+      "name": "Code",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 1,
+      "position": [
+        880,
+        380
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://media.guilded.gg/webhooks/REDACTED",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ $json.body }}",
+        "options": {}
+      },
+      "id": "0302455c-5164-4f1f-9a03-65944d1d7af3",
+      "name": "HTTP Request",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        1060,
+        380
+      ]
+    },
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyHour"
+            }
+          ]
+        },
+        "feedUrl": "https://nitter.uni-sonia.com/CHIARA63710634/rss"
+      },
+      "id": "5c325fd9-cf22-4ef7-825b-0e7fc01eb1e3",
+      "name": "RSS Feed Trigger",
+      "type": "n8n-nodes-base.rssFeedReadTrigger",
+      "typeVersion": 1,
+      "position": [
+        700,
+        380
+      ]
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Code": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "RSS Feed Trigger": {
+      "main": [
+        [
+          {
+            "node": "Code",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "saveManualExecutions": true,
+    "callerPolicy": "workflowsFromSameOwner",
+    "executionOrder": "v1"
+  },
+  "versionId": "fde24e5e-a283-4450-a8df-a1c379876512",
+  "id": "4hGqCQaN7Rc1a3bK",
+  "meta": {
+    "instanceId": "f3e8646dc25bb703680f7fd48308e56289d71dc10dc3ea0c5d57254342b6a676"
+  },
+  "tags": []
+}
