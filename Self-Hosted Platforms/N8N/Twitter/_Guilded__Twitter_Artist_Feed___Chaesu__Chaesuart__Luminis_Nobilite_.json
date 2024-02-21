@@ -42,7 +42,7 @@
             }
           ]
         },
-        "feedUrl": "https://nitter.uni-sonia.com/chaesuart/rss"
+        "feedUrl": "https://farside.link/nitter/chaesuart/rss"
       },
       "id": "aba2a896-dbb0-4aac-8893-11939c3afc25",
       "name": "RSS Feed Trigger",
@@ -85,7 +85,7 @@
     "callerPolicy": "workflowsFromSameOwner",
     "executionOrder": "v1"
   },
-  "versionId": "575b2d47-3214-4e00-9523-57486c4b5a8a",
+  "versionId": "2f7ce560-7d6d-45b1-8f31-cc58e8c3784a",
   "id": "56",
   "meta": {
     "instanceId": "f3e8646dc25bb703680f7fd48308e56289d71dc10dc3ea0c5d57254342b6a676"
