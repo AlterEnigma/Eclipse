@@ -42,7 +42,7 @@
             }
           ]
         },
-        "feedUrl": "https://nitter.uni-sonia.com/CHIARA63710634/rss"
+        "feedUrl": "https://farside.link/nitter/CHIARA63710634/rss"
       },
       "id": "5c325fd9-cf22-4ef7-825b-0e7fc01eb1e3",
       "name": "RSS Feed Trigger",
@@ -85,7 +85,7 @@
     "callerPolicy": "workflowsFromSameOwner",
     "executionOrder": "v1"
   },
-  "versionId": "fde24e5e-a283-4450-a8df-a1c379876512",
+  "versionId": "8bf32b4e-9021-4dbf-89ed-6bd93df4f913",
   "id": "4hGqCQaN7Rc1a3bK",
   "meta": {
     "instanceId": "f3e8646dc25bb703680f7fd48308e56289d71dc10dc3ea0c5d57254342b6a676"
