@@ -1,4 +1,10 @@
 name: 'Guilded Github Notifications'
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    types: [opened, closed, reopened]
 author: 'Reisonantia'
 description: 'A GitHub action for sending a Guilded notification embed, which can also be customized.'
 inputs:
