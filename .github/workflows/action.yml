@@ -69,6 +69,16 @@ runs:
         url: ${{ secrets.GUILDED_GITHUB_NOTIFICATIONS_WEBHOOK_URL }}
         method: 'POST'
         data: '{"content":null,"embeds":[{"title":"${{github.repository}} [${{github.ref_name}}]","description":"${{steps.process_commits.outputs.COMMIT_MESSAGE}}","url":"${{github.event.compare}}","color":${{inputs.embed-color}},"footer":{"text":"${{steps.process_commits.outputs.COMMITS_COUNT}} new commit(s)","icon_url":"${{inputs.footer-icon}}"},"timestamp":"${{steps.get_time.outputs.time}}"}],"username":"${{github.actor}}","avatar_url":"${{fromJson(steps.get_avatar.outputs.response).avatar_url}}"}'
+jobs:
+  test_discord_notification:
+    runs-on: ubuntu-latest
+    name: Guilded Github Notifications
+    steps:
+      - name: Guilded Github Notifications v1
+        with:
+          webhook-url: ${{ secrets.GUILDED_GITHUB_NOTIFICATIONS_WEBHOOK_URL }}
+          embed-color: '3093151'
+          footer-icon: 'https://cdn.discordapp.com/attachments/712252851283296260/961953852897255454/706526933973860412.png'
 branding:
   icon: 'bell'
   color: 'blue'
