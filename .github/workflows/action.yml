@@ -75,6 +75,7 @@ jobs:
     name: Guilded Github Notifications
     steps:
       - name: Guilded Github Notifications v1
+        uses: Reisonantia/LuminisNobilite/Eclipse@main
         with:
           webhook-url: ${{ secrets.GUILDED_GITHUB_NOTIFICATIONS_WEBHOOK_URL }}
           embed-color: '3093151'
