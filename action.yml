@@ -1,12 +1,6 @@
 name: 'Guilded Github Notifications'
-on:
-  push:
-    branches:
-      - main
-  pull_request:
-    types: [opened, closed, reopened]
 author: 'Reisonantia'
-description: 'A GitHub action for sending a Guilded notification embed, which can also be customized.'
+description: 'A GitHub action for sending Guilded notification embed, which can also be customized.'
 inputs:
   webhook-url:
     description: 'The Guilded webhook URL this notification will be send to.'
@@ -29,7 +23,7 @@ runs:
     - name: Process Commits
       # What we do here:
       #   - Get and seperate all commit messages with a newline.
-      #   - If the commit message is too big, cut it down.
+      #   - If the commit message are too big, cut it down.
       #   - Get how many commits we have through their unique commit ID.
       #   - Check if we have an actual commit push and not something else (e.g. branch push).
       #   - Check if our current branch is marked as hidden and the user wants to hide hidden branches.
@@ -66,20 +60,9 @@ runs:
       if: steps.process_commits.outputs.SHOULD_CONTINUE == 'true'
       uses: fjogeleit/http-request-action@master
       with:
-        url: ${{ secrets.GUILDED_GITHUB_NOTIFICATIONS_WEBHOOK_URL }}
+        url: ${{ inputs.webhook-url }}
         method: 'POST'
         data: '{"content":null,"embeds":[{"title":"${{github.repository}} [${{github.ref_name}}]","description":"${{steps.process_commits.outputs.COMMIT_MESSAGE}}","url":"${{github.event.compare}}","color":${{inputs.embed-color}},"footer":{"text":"${{steps.process_commits.outputs.COMMITS_COUNT}} new commit(s)","icon_url":"${{inputs.footer-icon}}"},"timestamp":"${{steps.get_time.outputs.time}}"}],"username":"${{github.actor}}","avatar_url":"${{fromJson(steps.get_avatar.outputs.response).avatar_url}}"}'
-jobs:
-  test_discord_notification:
-    runs-on: ubuntu-latest
-    name: Guilded Github Notifications
-    steps:
-      - name: Guilded Github Notifications v1
-        uses: Reisonantia/LuminisNobilite/Eclipse@main
-        with:
-          webhook-url: ${{ secrets.GUILDED_GITHUB_NOTIFICATIONS_WEBHOOK_URL }}
-          embed-color: '3093151'
-          footer-icon: 'https://cdn.discordapp.com/attachments/712252851283296260/961953852897255454/706526933973860412.png'
 branding:
   icon: 'bell'
   color: 'blue'

@@ -1,0 +1,17 @@
+name: Guilded Github Notifications
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  test_discord_notification:
+    runs-on: ubuntu-latest
+    name: Test Notification
+    steps:
+      - name: Send Notification
+        uses: LuminisNobilite/Eclipse@main
+        with:
+          webhook-url: ${{ secrets.GUILDED_GITHUB_NOTIFICATIONS_WEBHOOK_URL }}
+          embed-color: '3093151'
+          footer-icon: 'https://cdn.discordapp.com/attachments/712252851283296260/961953852897255454/706526933973860412.png'
