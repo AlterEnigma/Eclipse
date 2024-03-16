@@ -1,0 +1,103 @@
+{
+  "name": "(Guilded) Yande.re SFW/NSFW RSS Feed - Kantai Collection [Luminis Nobilite]",
+  "nodes": [
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "function convertTimestamp(inputTimestamp) {\n  const dateObj = new Date(inputTimestamp);\n  const options = { weekday: 'short', day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit', timeZone: 'GMT', timeZoneName: 'short' };\n  return dateObj.toLocaleString('en-US', options);\n}\n\nconst inputTimestamp = $('RSS Feed Trigger').item.json.pubDate;\nconst convertedTimestamp = convertTimestamp(inputTimestamp);\n\nconst inputData = $('RSS Feed Trigger').item.json.content;\n\n// Regex pattern to match the <img src> URL\nconst regex = /<img[^>]+src=\"([^\">]+)\"/;\n\n// Extract the <img src> URL using regex\nconst match = inputData.match(regex);\nconst imgSrcUrl = match ? match[1] : '';\n\n// Convert the URL according to the given constraints\nconst convertedUrlInit = imgSrcUrl.replace(/\\/data\\/preview\\/([A-Za-z0-9]+)\\/([A-Za-z0-9]+)\\/([A-Za-z0-9]+\\.[A-Za-z0-9]+)$/, '/image/$3');\n\nconst convertedUrlFinal = convertedUrlInit.replace(\"assets\",\"files\");\n\n\nvar body = {\n  embeds: [\n    {\n      color: 14837107,\n      author: {\n        name: 'Kantai Collection',\n        url: 'https://en.kancollewiki.net/Kancolle_Wiki',\n        icon_url:\n          'https://i.redd.it/u81am2zihfq31.png',\n      },\n      title: $('RSS Feed Trigger').item.json.title,\n      url: $('RSS Feed Trigger').item.json.link,\n      image: {\n        url: convertedUrlFinal,\n      },\n      footer: {\n        text: String.prototype.concat(\"Yande.re • \", convertedTimestamp, \" • \", $('RSS Feed Trigger').item.json.author),\n        icon_url: 'https://cdn.myanimelist.net/images/characters/8/269729.jpg',\n      }\n    }\n  ]\n};\n\nreturn { body };"
+      },
+      "id": "9dd84cef-5977-4ac9-9721-0c87bf89def5",
+      "name": "Code",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 1,
+      "position": [
+        980,
+        380
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://media.guilded.gg/webhooks/REDACTED",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ $json.body }}",
+        "options": {
+          "batching": {
+            "batch": {
+              "batchSize": 10,
+              "batchInterval": 10000
+            }
+          }
+        }
+      },
+      "id": "487cffb9-1487-4276-a0d1-533cc31a45e0",
+      "name": "HTTP Request",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        1160,
+        380
+      ]
+    },
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyHour",
+              "minute": 30
+            }
+          ]
+        },
+        "feedUrl": "https://yande.re/post/atom?tags=kantai_collection"
+      },
+      "id": "58fcadfc-20dc-4c1f-839e-34bf996d2bcf",
+      "name": "RSS Feed Trigger",
+      "type": "n8n-nodes-base.rssFeedReadTrigger",
+      "typeVersion": 1,
+      "position": [
+        800,
+        380
+      ]
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Code": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "RSS Feed Trigger": {
+      "main": [
+        [
+          {
+            "node": "Code",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "saveManualExecutions": true,
+    "callerPolicy": "workflowsFromSameOwner",
+    "executionOrder": "v1"
+  },
+  "versionId": "bfcb228e-c6b6-4a96-b99a-43d77508e6f7",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "f3e8646dc25bb703680f7fd48308e56289d71dc10dc3ea0c5d57254342b6a676"
+  },
+  "id": "28",
+  "tags": []
+}
