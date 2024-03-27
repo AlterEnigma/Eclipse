@@ -1,0 +1,221 @@
+{
+  "name": "(Guilded) Reddit NSFW Art Feed - Hentai /r/Hentai [Luminis Nobilite]",
+  "nodes": [
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://media.guilded.gg/webhooks/REDACTED",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ $json.body }}",
+        "options": {
+          "batching": {
+            "batch": {
+              "batchSize": 10,
+              "batchInterval": 10000
+            }
+          }
+        }
+      },
+      "id": "529634b4-03f7-46bf-baf2-4cb00a215a0c",
+      "name": "HTTP Request",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        1080,
+        820
+      ]
+    },
+    {
+      "parameters": {
+        "html": "={{ $json.content }}",
+        "destinationKey": "content",
+        "options": {}
+      },
+      "id": "fbf25792-df32-4376-b1ff-2f5147b104cf",
+      "name": "Markdown",
+      "type": "n8n-nodes-base.markdown",
+      "typeVersion": 1,
+      "position": [
+        360,
+        820
+      ]
+    },
+    {
+      "parameters": {
+        "textsWithManipulations": {
+          "textsWithManipulationsValues": [
+            {
+              "dataSources": {
+                "dataSource": [
+                  {
+                    "readOperation": "fromJSON",
+                    "sourceKey": "contentSnippet",
+                    "destinationKey": "contentSnippet"
+                  }
+                ]
+              },
+              "manipulations": {
+                "manipulation": [
+                  {
+                    "action": "replace",
+                    "replaceMode": "regex",
+                    "regex": "/[-_*]{3,}/gm"
+                  },
+                  {
+                    "action": "replace",
+                    "replaceMode": "extendedSubstring",
+                    "substring": "submitted by "
+                  },
+                  {
+                    "action": "replace",
+                    "replaceMode": "regex",
+                    "regex": "/\\/u\\/[A-Za-z0-9_-]+/g"
+                  },
+                  {
+                    "action": "replace",
+                    "replaceMode": "extendedSubstring",
+                    "substring": "[link]"
+                  },
+                  {
+                    "action": "replace",
+                    "replaceMode": "extendedSubstring",
+                    "substring": "[comments]"
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      },
+      "id": "60fa2a16-1ba1-4ac5-8fd5-88db24525517",
+      "name": "TextManipulation",
+      "type": "n8n-nodes-text-manipulation.textManipulation",
+      "typeVersion": 1,
+      "position": [
+        540,
+        820
+      ]
+    },
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyHour",
+              "minute": 20
+            }
+          ]
+        },
+        "feedUrl": "https://www.reddit.com/r/hentai/hot/.rss"
+      },
+      "id": "2758ca5f-8db4-4546-b7be-98d38f5becd9",
+      "name": "RSS Feed Trigger",
+      "type": "n8n-nodes-base.rssFeedReadTrigger",
+      "typeVersion": 1,
+      "position": [
+        180,
+        820
+      ]
+    },
+    {
+      "parameters": {
+        "url": "=https://www.reddit.com/user/{{ $json.author.replace('/u/', '') }}/about.json",
+        "options": {}
+      },
+      "id": "08ee39a2-c486-4c7e-8a95-c43210261861",
+      "name": "Reddit API GET Request - User Icon URL",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        720,
+        820
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "function convertTimestamp(inputTimestamp) {\n  const dateObj = new Date(inputTimestamp);\n  const options = { weekday: 'short', day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit', timeZone: 'GMT', timeZoneName: 'short' };\n  return dateObj.toLocaleString('en-US', options);\n}\n\n\nconst inputTimestamp = $('RSS Feed Trigger').item.json.pubDate;\nconst convertedTimestamp = convertTimestamp(inputTimestamp);\n\n\nconst authorInit = $('RSS Feed Trigger').item.json.author;\nconst authorFinal = authorInit.replace(/\\/u\\//g, \"\");\nconst authorSnippet = \"submitted by \" + authorInit + \" [link] [comments]\";\nconst user_link = `https://reddit.com/user/${authorFinal}`;\nconst originalUserIconURL = $('Reddit API GET Request - User Icon URL').item.json.data.icon_img;\nconst user_iconUrl = originalUserIconURL.replace(/\\.(jpg|jpeg|png).*/, '.$1');\nconst inputContent = $('RSS Feed Trigger').item.json.content;\nconst regex = /<img\\s+[^>]*src=\"([^\"]+)\"[^>]*>/g;\nconst match = regex.exec(inputContent);\n\n\nconst subredditRegex = /(\\/r\\/[^/]+)/;\nconst subreddit_urlInit = $('RSS Feed Trigger').item.json.link\nconst subreddit_urlMatch = subreddit_urlInit.match(subredditRegex);\nconst subreddit_urlFinal = subreddit_urlMatch ? subreddit_urlMatch[1] : null;\nconst nameInit = $('RSS Feed Trigger').item.json.author;\nconst nameFinal = String.prototype.concat(nameInit, \" in \", subreddit_urlFinal)\nconst textMod = String.prototype.concat(\"Reddit • \", convertedTimestamp);\n\n\n// Extracting text between <p> tags\nconst textRegex = /<p>(.*?)<\\/p>/gs;\nconst textMatches = inputContent.matchAll(textRegex);\nconst paragraphs = Array.from(textMatches, match => match[1]);\n\n// Concatenating paragraphs with line breaks\nconst text = paragraphs.join('\\n\\n');\n\n// Decoding HTML entities\nconst decoded_text = text.replace(/&#(\\d+);/g, (match, dec) => String.fromCharCode(dec));\n\n// Extracting image URL\nconst linkRegex = /<span><a href=\"([^\"]+)\">\\[link\\]<\\/a><\\/span>/;\nconst linkMatch = inputContent.match(linkRegex);\nlet image_url = null;\n\n\n\n// Priority to i.redd.it URLs\nconst imageRegex = /https:\\/\\/i\\.redd\\.it\\/([^\\/]+)\\.(gif|jpeg|jpg|png)/;\nconst imageMatches = inputContent.match(imageRegex);\nif (imageMatches) {\n  image_url = `https://i.redd.it/${imageMatches[1]}.${imageMatches[2]}`;\n}\n\n\n// Fallback to img src if image URL is not found\nif (!image_url) {\n  const imgRegex = /<img src=\"([^\"]+)\"/;\n  const imgMatch = inputContent.match(imgRegex);\n  image_url = imgMatch ? imgMatch[1] : null;\n}\n\n// Further processing if needed, such as removing unnecessary details from the URL\n// For example, if you want to remove query parameters like \"?width=640&crop=smart&auto=webp&s=c154978775f0f11fbec6ac33e1ce01c1b53df5b4\"\nif (image_url && image_url.startsWith('https://preview.redd.it')) {\n  image_url = image_url.split('?')[0]; // Keep only the part before the query string\n}\n\n// Formatting links to Discord hyperlink format\nconst formatted_text = decoded_text.replace(/<a href=\"([^\"]+)\">(.*?)<\\/a>/g, '[$2]($1)');\n\nconst contentSnippet = $('TextManipulation').item.json.contentSnippet;\nconst maxSnippetLength = 2000;\n\nlet snippet = contentSnippet;\nif (snippet.length > maxSnippetLength) {\n  snippet = snippet.substring(0, maxSnippetLength);\n  // Trim the snippet to the last complete word\n  snippet = snippet.substring(0, snippet.lastIndexOf(' ')) + '...';\n}\n\n\nlet embed = {\n  color: 16733952,\n  author: {\n    name: nameFinal,\n    url: user_link,\n    icon_url: user_iconUrl,\n  },\n  url: $(\"RSS Feed Trigger\").item.json['link'],\n  footer: {\n    text: textMod,\n    icon_url: 'https://raw.githubusercontent.com/LuminisNobilite/Eclipse/main/Assets/Icons/Guilded/Guilded%20-%20Gold%20Reddit%20Icon%20v1.png',\n  },\n};\n\nif (image_url) {\n  embed.image = {\n    url: image_url,\n  };\n}\nif(snippet.trim() !== \"\"){\n  embed.description = snippet.trim();\n}\n\nembed.title = $(\"RSS Feed Trigger\").item.json.title;\n\nconst body = {\n  embeds: [embed],\n};\n\nreturn { body };"
+      },
+      "id": "5b0ef84d-e149-4cf1-81ce-2290e57b9f49",
+      "name": "Code",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 1,
+      "position": [
+        900,
+        820
+      ]
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Markdown": {
+      "main": [
+        [
+          {
+            "node": "TextManipulation",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "TextManipulation": {
+      "main": [
+        [
+          {
+            "node": "Reddit API GET Request - User Icon URL",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "RSS Feed Trigger": {
+      "main": [
+        [
+          {
+            "node": "Markdown",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Reddit API GET Request - User Icon URL": {
+      "main": [
+        [
+          {
+            "node": "Code",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "saveManualExecutions": true,
+    "callerPolicy": "workflowsFromSameOwner",
+    "executionOrder": "v1"
+  },
+  "versionId": "a35aee80-c0ae-4f8e-9164-6717ceba5554",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "f3e8646dc25bb703680f7fd48308e56289d71dc10dc3ea0c5d57254342b6a676"
+  },
+  "id": "55",
+  "tags": []
+}
