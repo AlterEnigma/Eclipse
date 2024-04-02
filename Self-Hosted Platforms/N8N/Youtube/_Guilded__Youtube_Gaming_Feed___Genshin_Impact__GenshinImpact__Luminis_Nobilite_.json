@@ -1,0 +1,238 @@
+{
+  "name": "(Guilded) Youtube Gaming Feed - Genshin Impact @GenshinImpact [Luminis Nobilite]",
+  "nodes": [
+    {
+      "parameters": {
+        "options": {}
+      },
+      "id": "4968ca92-5398-4056-8ad9-474776e943e6",
+      "name": "XML",
+      "type": "n8n-nodes-base.xml",
+      "typeVersion": 1,
+      "position": [
+        1200,
+        260
+      ]
+    },
+    {
+      "parameters": {
+        "url": "https://www.youtube.com/feeds/videos.xml?channel_id=UCiS882YPwZt1NfaM0gR0D9Q",
+        "options": {}
+      },
+      "id": "7f559969-cd44-41ad-8510-1c59de4c34ec",
+      "name": "HTTP Request - Youtube API",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        980,
+        380
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "return $json.feed.entry[0];"
+      },
+      "id": "64d42ace-2339-4d28-ba15-5584e32f44df",
+      "name": "Filter Code",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 1,
+      "position": [
+        1400,
+        140
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "function convertTimestamp(inputTimestamp) {\n  const dateObj = new Date(inputTimestamp);\n  const options = { weekday: 'short', day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit', timeZone: 'GMT', timeZoneName: 'short' };\n  return dateObj.toLocaleString('en-US', options);\n}\n\nconst iconUrlFinal = 'https://raw.githubusercontent.com/LuminisNobilite/Eclipse/main/Assets/Twitter/Twitter%20Gaming%20Feeds/Avatars/%40GenshinImpact_400x400.jpg';\nconst nameInit = $('RSS Feed Trigger').item.json['author'];\n\nconst thumbnailUrl = $('Set').item.json.data[0].snippet.thumbnails.maxres\n  ? $('Set').item.json.data[0].snippet.thumbnails.maxres.url\n  : $('Set').item.json.data[0].snippet.thumbnails.standard.url;\n\n\nconst inputTimestamp = $('RSS Feed Trigger').item.json.pubDate;\nconst convertedTimestamp = convertTimestamp(inputTimestamp);\n\nconst textMod = String.prototype.concat(\"Youtube • \", convertedTimestamp);\n\nlet descriptionHyperlinked = $('Filter Code').item.json['media:group']['media:description'];\n\n// Use a regular expression to search for URLs within the description field\nconst urlRegex = /(https?:\\/\\/[^\\s]+)/g;\ndescriptionHyperlinked = descriptionHyperlinked.replace(urlRegex, '[$1]($1)');\n\n// Regular expression pattern to match hashtags\nconst hashtagRegex = /(^|\\s)(#[^\\s]+)/g;\n// Find all the hashtags in the description string\nconst hashtags = descriptionHyperlinked.match(hashtagRegex);\n// Replace the hashtags with URLs\nif (hashtags) {\n  hashtags.forEach(hashtag => {\n    const cleanHashtag = hashtag.trim(); // Remove leading and trailing spaces\n    const hashtagUrl = `https://www.youtube.com/hashtag/${cleanHashtag.toLowerCase().replace('#', '')}`;\n    const hashtagLink = `[${cleanHashtag}](${hashtagUrl})`; // Use cleaned hashtag\n    // Check if there's a closing square bracket ']' after the hashtag, and if not, add a space\n    if (!/\\]\\([^)]*$/.test(descriptionHyperlinked)) {\n      descriptionHyperlinked = descriptionHyperlinked.replace(hashtag, `${hashtagLink} `); // Insert space after the link\n    } else {\n      descriptionHyperlinked = descriptionHyperlinked.replace(hashtag, `${hashtagLink}`);\n    }\n  });\n}\n\n// Regular expression pattern to match @ mentions\nconst mentionRegex = /(^|\\s)@(\\w+)/g;\n// Find all the @ mentions in the description string\nconst mentions = descriptionHyperlinked.match(mentionRegex);\n// Replace the @ mentions with URLs\nif (mentions) {\n  mentions.forEach(mention => {\n    const username = mention.trim().substring(1); // Remove leading '@' and trim spaces\n    const mentionUrl = `https://youtube.com/${username}`;\n    const mentionLink = `[@${username}](${mentionUrl})`; // Include the '@' symbol\n    descriptionHyperlinked = descriptionHyperlinked.replace(mention, mentionLink);\n  });\n}\n\n\nlet embed = {\n    color: 16711680,\n    author: {\n      name: nameInit,\n      url: $(\"RSS Feed Trigger\").item.json.link,\n      icon_url: iconUrlFinal,\n    },\n    url: $(\"RSS Feed Trigger\").item.json['link'],\n    image: {\n      url: thumbnailUrl,\n    },\n    footer: {\n      text: textMod,\n      icon_url: 'https://raw.githubusercontent.com/LuminisNobilite/Eclipse/main/Assets/Icons/Guilded/Guilded%20-%20Gold%20Youtube%20Icon%20v1.png',\n    },\n  };\n    embed.title = $(\"RSS Feed Trigger\").item.json['title'];\n    embed.description = descriptionHyperlinked;\n  const body = {\n    embeds: [embed],\n  };\n  return { body };"
+      },
+      "id": "387bcb95-00ec-4d69-b88e-c0a07924160f",
+      "name": "Main Driver Code",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 1,
+      "position": [
+        1800,
+        140
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://media.guilded.gg/webhooks/REDACTED",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ $json.body }}",
+        "options": {
+          "batching": {
+            "batch": {
+              "batchSize": 10,
+              "batchInterval": 10000
+            }
+          }
+        }
+      },
+      "id": "3cb3ac03-f9de-408a-afb2-952071fdf8ab",
+      "name": "HTTP Request",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        1960,
+        260
+      ]
+    },
+    {
+      "parameters": {
+        "url": "=https://www.googleapis.com/youtube/v3/videos?id={{ $json['yt:videoId'] }}&key=REDACTED&part=snippet&fields=items/snippet/thumbnails",
+        "options": {}
+      },
+      "id": "b54ca9c0-d8ec-4c45-802d-81954f757319",
+      "name": "Youtube Data API V3 HTTP",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        1500,
+        380
+      ]
+    },
+    {
+      "parameters": {
+        "keepOnlySet": true,
+        "values": {
+          "string": [
+            {
+              "name": "data",
+              "value": "={{ $json.items }}"
+            },
+            {
+              "name": "data[0]",
+              "value": "={{ $json.items[0] }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "c96c7026-94eb-45b8-9f8b-5f794a000e93",
+      "name": "Set",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 2,
+      "position": [
+        1640,
+        260
+      ]
+    },
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyX"
+            }
+          ]
+        },
+        "feedUrl": "https://www.youtube.com/feeds/videos.xml?channel_id=UCiS882YPwZt1NfaM0gR0D9Q"
+      },
+      "id": "35f9d8f6-038f-4a26-8d78-1af5e4c53075",
+      "name": "RSS Feed Trigger",
+      "type": "n8n-nodes-base.rssFeedReadTrigger",
+      "typeVersion": 1,
+      "position": [
+        800,
+        380
+      ]
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "XML": {
+      "main": [
+        [
+          {
+            "node": "Filter Code",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request - Youtube API": {
+      "main": [
+        [
+          {
+            "node": "XML",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter Code": {
+      "main": [
+        [
+          {
+            "node": "Youtube Data API V3 HTTP",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Main Driver Code": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Youtube Data API V3 HTTP": {
+      "main": [
+        [
+          {
+            "node": "Set",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set": {
+      "main": [
+        [
+          {
+            "node": "Main Driver Code",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "RSS Feed Trigger": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request - Youtube API",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "saveManualExecutions": true,
+    "callerPolicy": "workflowsFromSameOwner",
+    "executionOrder": "v1"
+  },
+  "versionId": "486014b5-a977-4085-88e3-997463aec597",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "f3e8646dc25bb703680f7fd48308e56289d71dc10dc3ea0c5d57254342b6a676"
+  },
+  "id": "13",
+  "tags": []
+}
