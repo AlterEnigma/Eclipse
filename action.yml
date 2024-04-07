@@ -62,7 +62,7 @@ runs:
       with:
         url: ${{ inputs.webhook-url }}
         method: 'POST'
-        data: '{"content":null,"embeds":[{"author": {"name": "${{ github.actor }}", "url": "https://github.com/${{ github.actor }}", "icon_url": "${{fromJson(steps.get_avatar.outputs.response).avatar_url}}" },"title":"${{github.repository}} [${{github.ref_name}}]","description":"${{steps.process_commits.outputs.COMMIT_MESSAGE}}","url":"${{github.event.compare}}","color":${{inputs.embed-color}},"footer":{"text":"${{steps.process_commits.outputs.COMMITS_COUNT}} new commit(s)","icon_url":"${{inputs.footer-icon}}"},"timestamp":"${{steps.get_time.outputs.time}}"}]}'
+        data: '{"content":null,"embeds":[{"author": {"name": "${{ github.actor }}", "url": "https://github.com/${{ github.actor }}", "icon_url": "${{fromJson(steps.get_avatar.outputs.response).avatar_url}}" },"title":"${{github.repository}} [${{github.ref_name}}]","description":"${{steps.process_commits.outputs.COMMIT_MESSAGE}}","url":"${{github.event.compare}}","color":${{inputs.embed-color}},"footer":{"text":"Github • ${{steps.process_commits.outputs.COMMITS_COUNT}} new commit(s)","icon_url":"${{inputs.footer-icon}}"},"timestamp":"${{steps.get_time.outputs.time}}"}]}'
 branding:
   icon: 'bell'
   color: 'blue'
