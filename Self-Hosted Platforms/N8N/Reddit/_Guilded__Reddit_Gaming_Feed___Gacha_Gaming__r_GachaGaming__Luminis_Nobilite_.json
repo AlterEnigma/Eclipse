@@ -3,43 +3,57 @@
   "nodes": [
     {
       "parameters": {
-        "method": "POST",
-        "url": "https://media.guilded.gg/webhooks/REDACTED",
-        "sendBody": true,
-        "specifyBody": "json",
-        "jsonBody": "={{ $json.body }}",
-        "options": {
-          "batching": {
-            "batch": {
-              "batchSize": 10,
-              "batchInterval": 10000
+        "url": "https://www.reddit.com/r/gachagaming/hot/.rss",
+        "options": {}
+      },
+      "name": "RSS Feed Read",
+      "type": "n8n-nodes-base.rssFeedRead",
+      "typeVersion": 1,
+      "position": [
+        720,
+        560
+      ],
+      "id": "0c638dbb-94fe-4c3b-8be4-181fd582f908"
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "hours",
+              "triggerAtMinute": 30
             }
-          }
+          ]
         }
       },
-      "id": "46b1ee9d-53d7-4632-b5ef-ce7f637d5f93",
-      "name": "HTTP Request",
-      "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.1,
+      "id": "8c1ff2be-57f9-42ae-9b73-81a2ba60b94f",
+      "name": "Schedule Trigger",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.1,
       "position": [
-        1560,
-        520
+        540,
+        560
       ]
     },
     {
       "parameters": {
-        "html": "={{ $json.content }}",
-        "destinationKey": "content",
-        "options": {}
+        "conditions": {
+          "dateTime": [
+            {
+              "value1": "={{$json[\"isoDate\"]}}",
+              "value2": "={{ $now.minus({hours: 1}) }}"
+            }
+          ]
+        }
       },
-      "id": "f18f28fe-e62a-47d0-ac4c-da685828bf98",
-      "name": "Markdown",
-      "type": "n8n-nodes-base.markdown",
+      "name": "New post check",
+      "type": "n8n-nodes-base.if",
       "typeVersion": 1,
       "position": [
-        840,
-        520
-      ]
+        940,
+        560
+      ],
+      "id": "e7fb8748-9adb-4912-925e-f97b6c4c6677"
     },
     {
       "parameters": {
@@ -88,34 +102,13 @@
           ]
         }
       },
-      "id": "e49ba47d-3df1-4889-9457-0efd8a323b3f",
+      "id": "6ed551f8-8099-4af2-9e64-92b2898d015f",
       "name": "TextManipulation",
       "type": "n8n-nodes-text-manipulation.textManipulation",
       "typeVersion": 1,
       "position": [
-        1020,
-        520
-      ]
-    },
-    {
-      "parameters": {
-        "pollTimes": {
-          "item": [
-            {
-              "mode": "everyHour",
-              "minute": 20
-            }
-          ]
-        },
-        "feedUrl": "https://www.reddit.com/r/gachagaming/hot/.rss"
-      },
-      "id": "64f83a51-47a3-46e5-810c-25de45f25278",
-      "name": "RSS Feed Trigger",
-      "type": "n8n-nodes-base.rssFeedReadTrigger",
-      "typeVersion": 1,
-      "position": [
-        660,
-        520
+        1140,
+        540
       ]
     },
     {
@@ -123,33 +116,80 @@
         "url": "=https://www.reddit.com/user/{{ $json.author.replace('/u/', '') }}/about.json",
         "options": {}
       },
-      "id": "8a19457c-1ed7-4d04-9ba3-4ddd1b35f96d",
+      "id": "43a05c7b-9ca9-4d02-963a-dabbbb9c4d0c",
       "name": "Reddit API GET Request - User Icon URL",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.1,
       "position": [
-        1200,
-        520
+        1320,
+        540
       ]
     },
     {
       "parameters": {
         "mode": "runOnceForEachItem",
-        "jsCode": "function convertTimestamp(inputTimestamp) {\n  const dateObj = new Date(inputTimestamp);\n  const options = { weekday: 'short', day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit', timeZone: 'GMT', timeZoneName: 'short' };\n  return dateObj.toLocaleString('en-US', options);\n}\n\n\nconst inputTimestamp = $('RSS Feed Trigger').item.json.pubDate;\nconst convertedTimestamp = convertTimestamp(inputTimestamp);\n\n\nconst authorInit = $('RSS Feed Trigger').item.json.author;\nconst authorFinal = authorInit.replace(/\\/u\\//g, \"\");\nconst authorSnippet = \"submitted by \" + authorInit + \" [link] [comments]\";\nconst user_link = `https://reddit.com/user/${authorFinal}`;\nconst originalUserIconURL = $('Reddit API GET Request - User Icon URL').item.json.data.icon_img;\nconst user_iconUrl = originalUserIconURL.replace(/\\.(jpg|jpeg|png).*/, '.$1');\nconst inputContent = $('RSS Feed Trigger').item.json.content;\nconst regex = /<img\\s+[^>]*src=\"([^\"]+)\"[^>]*>/g;\nconst match = regex.exec(inputContent);\n\n\nconst subredditRegex = /(\\/r\\/[^/]+)/;\nconst subreddit_urlInit = $('RSS Feed Trigger').item.json.link\nconst subreddit_urlMatch = subreddit_urlInit.match(subredditRegex);\nconst subreddit_urlFinal = subreddit_urlMatch ? subreddit_urlMatch[1] : null;\nconst nameInit = $('RSS Feed Trigger').item.json.author;\nconst nameFinal = String.prototype.concat(nameInit, \" in \", subreddit_urlFinal)\nconst textMod = String.prototype.concat(\"Reddit • \", convertedTimestamp);\n\n\n// Extracting text between <p> tags\nconst textRegex = /<p>(.*?)<\\/p>/gs;\nconst textMatches = inputContent.matchAll(textRegex);\nconst paragraphs = Array.from(textMatches, match => match[1]);\n\n// Concatenating paragraphs with line breaks\nconst text = paragraphs.join('\\n\\n');\n\n// Decoding HTML entities\nconst decoded_text = text.replace(/&#(\\d+);/g, (match, dec) => String.fromCharCode(dec));\n\n// Extracting image URL\nconst linkRegex = /<span><a href=\"([^\"]+)\">\\[link\\]<\\/a><\\/span>/;\nconst linkMatch = inputContent.match(linkRegex);\nlet image_url = null;\n\n\n\n// Priority to i.redd.it URLs\nconst imageRegex = /https:\\/\\/i\\.redd\\.it\\/([^\\/]+)\\.(gif|jpeg|jpg|png)/;\nconst imageMatches = inputContent.match(imageRegex);\nif (imageMatches) {\n  image_url = `https://i.redd.it/${imageMatches[1]}.${imageMatches[2]}`;\n}\n\n\n// Fallback to img src if image URL is not found\nif (!image_url) {\n  const imgRegex = /<img src=\"([^\"]+)\"/;\n  const imgMatch = inputContent.match(imgRegex);\n  image_url = imgMatch ? imgMatch[1] : null;\n}\n\n// Further processing if needed, such as removing unnecessary details from the URL\n// For example, if you want to remove query parameters like \"?width=640&crop=smart&auto=webp&s=c154978775f0f11fbec6ac33e1ce01c1b53df5b4\"\nif (image_url && image_url.startsWith('https://preview.redd.it')) {\n  image_url = image_url.split('?')[0]; // Keep only the part before the query string\n}\n\n// Formatting links to Discord hyperlink format\nconst formatted_text = decoded_text.replace(/<a href=\"([^\"]+)\">(.*?)<\\/a>/g, '[$2]($1)');\n\nconst contentSnippet = $('TextManipulation').item.json.contentSnippet;\nconst maxSnippetLength = 2000;\n\nlet snippet = contentSnippet;\nif (snippet.length > maxSnippetLength) {\n  snippet = snippet.substring(0, maxSnippetLength);\n  // Trim the snippet to the last complete word\n  snippet = snippet.substring(0, snippet.lastIndexOf(' ')) + '...';\n}\n\n\nlet embed = {\n  color: 16733952,\n  author: {\n    name: nameFinal,\n    url: user_link,\n    icon_url: user_iconUrl,\n  },\n  url: $(\"RSS Feed Trigger\").item.json['link'],\n  footer: {\n    text: textMod,\n    icon_url: 'https://raw.githubusercontent.com/LuminisNobilite/Eclipse/main/Assets/Icons/Guilded/Guilded%20-%20Gold%20Reddit%20Icon%20v1.png',\n  },\n};\n\nif (image_url) {\n  embed.image = {\n    url: image_url,\n  };\n}\nif(snippet.trim() !== \"\"){\n  embed.description = snippet.trim();\n}\n\nembed.title = $(\"RSS Feed Trigger\").item.json.title;\n\nconst body = {\n  embeds: [embed],\n};\n\nreturn { body };"
+        "jsCode": "function convertTimestamp(inputTimestamp) {\n  const dateObj = new Date(inputTimestamp);\n  const options = { weekday: 'short', day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit', timeZone: 'GMT', timeZoneName: 'short' };\n  return dateObj.toLocaleString('en-US', options);\n}\n\n\nconst inputTimestamp = $('RSS Feed Read').item.json.pubDate;\nconst convertedTimestamp = convertTimestamp(inputTimestamp);\n\n\nconst authorInit = $('RSS Feed Read').item.json.author;\nconst authorFinal = authorInit.replace(/\\/u\\//g, \"\");\nconst authorSnippet = \"submitted by \" + authorInit + \" [link] [comments]\";\nconst user_link = `https://reddit.com/user/${authorFinal}`;\nconst originalUserIconURL = $('Reddit API GET Request - User Icon URL').item.json.data.icon_img;\nconst user_iconUrl = originalUserIconURL.replace(/\\.(jpg|jpeg|png).*/, '.$1');\nconst inputContent = $('RSS Feed Read').item.json.content;\nconst regex = /<img\\s+[^>]*src=\"([^\"]+)\"[^>]*>/g;\nconst match = regex.exec(inputContent);\n\n\nconst subredditRegex = /(\\/r\\/[^/]+)/;\nconst subreddit_urlInit = $('RSS Feed Read').item.json.link\nconst subreddit_urlMatch = subreddit_urlInit.match(subredditRegex);\nconst subreddit_urlFinal = subreddit_urlMatch ? subreddit_urlMatch[1] : null;\nconst nameInit = $('RSS Feed Read').item.json.author;\nconst nameFinal = String.prototype.concat(nameInit, \" in \", subreddit_urlFinal)\nconst textMod = String.prototype.concat(\"Reddit • \", convertedTimestamp);\n\n\n// Extracting text between <p> tags\nconst textRegex = /<p>(.*?)<\\/p>/gs;\nconst textMatches = inputContent.matchAll(textRegex);\nconst paragraphs = Array.from(textMatches, match => match[1]);\n\n// Concatenating paragraphs with line breaks\nconst text = paragraphs.join('\\n\\n');\n\n// Decoding HTML entities\nconst decoded_text = text.replace(/&#(\\d+);/g, (match, dec) => String.fromCharCode(dec));\n\n// Extracting image URL\nconst linkRegex = /<span><a href=\"([^\"]+)\">\\[link\\]<\\/a><\\/span>/;\nconst linkMatch = inputContent.match(linkRegex);\nlet image_url = null;\n\n\n\n// Priority to i.redd.it URLs\nconst imageRegex = /https:\\/\\/i\\.redd\\.it\\/([^\\/]+)\\.(gif|jpeg|jpg|png)/;\nconst imageMatches = inputContent.match(imageRegex);\nif (imageMatches) {\n  image_url = `https://i.redd.it/${imageMatches[1]}.${imageMatches[2]}`;\n}\n\n\n// Fallback to img src if image URL is not found\nif (!image_url) {\n  const imgRegex = /<img src=\"([^\"]+)\"/;\n  const imgMatch = inputContent.match(imgRegex);\n  image_url = imgMatch ? imgMatch[1] : null;\n}\n\n// Further processing if needed, such as removing unnecessary details from the URL\n// For example, if you want to remove query parameters like \"?width=640&crop=smart&auto=webp&s=c154978775f0f11fbec6ac33e1ce01c1b53df5b4\"\nif (image_url && image_url.startsWith('https://preview.redd.it')) {\n  image_url = image_url.split('?')[0]; // Keep only the part before the query string\n}\n\n// Formatting links to Discord hyperlink format\nconst formatted_text = decoded_text.replace(/<a href=\"([^\"]+)\">(.*?)<\\/a>/g, '[$2]($1)');\n\nconst contentSnippet = $('TextManipulation').item.json.contentSnippet;\nconst maxSnippetLength = 2000;\n\nlet snippet = contentSnippet;\nif (snippet.length > maxSnippetLength) {\n  snippet = snippet.substring(0, maxSnippetLength);\n  // Trim the snippet to the last complete word\n  snippet = snippet.substring(0, snippet.lastIndexOf(' ')) + '...';\n}\n\n\nlet embed = {\n  color: 16733952,\n  author: {\n    name: nameFinal,\n    url: user_link,\n    icon_url: user_iconUrl,\n  },\n  url: $(\"RSS Feed Read\").item.json['link'],\n  footer: {\n    text: textMod,\n    icon_url: 'https://raw.githubusercontent.com/LuminisNobilite/Eclipse/main/Assets/Icons/Guilded/Guilded%20-%20Gold%20Reddit%20Icon%20v1.png',\n  },\n};\n\nif (image_url) {\n  embed.image = {\n    url: image_url,\n  };\n}\nif(snippet.trim() !== \"\"){\n  embed.description = snippet.trim();\n}\n\nembed.title = $(\"RSS Feed Read\").item.json.title;\n\nconst body = {\n  embeds: [embed],\n};\n\nreturn { body };"
       },
-      "id": "3912f772-e44a-4f92-9af3-9b7de46a7db1",
+      "id": "ad813845-9fba-44a1-ac2e-5dd4683a253e",
       "name": "Code",
       "type": "n8n-nodes-base.code",
       "typeVersion": 1,
       "position": [
-        1380,
-        520
+        1500,
+        540
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://media.guilded.gg/webhooks/REDACTED",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ $json.body }}",
+        "options": {
+          "batching": {
+            "batch": {
+              "batchSize": 10,
+              "batchInterval": 10000
+            }
+          }
+        }
+      },
+      "id": "f6b593b8-ecec-43b6-9b5b-3217750fb1b4",
+      "name": "HTTP Request",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        1680,
+        540
       ]
     }
   ],
   "pinData": {},
   "connections": {
-    "Markdown": {
+    "RSS Feed Read": {
+      "main": [
+        [
+          {
+            "node": "New post check",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "RSS Feed Read",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "New post check": {
       "main": [
         [
           {
@@ -165,17 +205,6 @@
         [
           {
             "node": "Reddit API GET Request - User Icon URL",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "RSS Feed Trigger": {
-      "main": [
-        [
-          {
-            "node": "Markdown",
             "type": "main",
             "index": 0
           }
@@ -212,7 +241,7 @@
     "callerPolicy": "workflowsFromSameOwner",
     "executionOrder": "v1"
   },
-  "versionId": "3cd3c6cc-4e4c-482d-80e2-c3c458aba6c5",
+  "versionId": "d4a0ce27-4ac4-48b3-8c8d-bab3ff3eb9e0",
   "meta": {
     "templateCredsSetupCompleted": true,
     "instanceId": "f3e8646dc25bb703680f7fd48308e56289d71dc10dc3ea0c5d57254342b6a676"
