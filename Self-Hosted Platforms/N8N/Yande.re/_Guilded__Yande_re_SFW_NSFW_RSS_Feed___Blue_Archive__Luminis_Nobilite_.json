@@ -4,15 +4,15 @@
     {
       "parameters": {
         "mode": "runOnceForEachItem",
-        "jsCode": "function convertTimestamp(inputTimestamp) {\n  const dateObj = new Date(inputTimestamp);\n  const options = { weekday: 'short', day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit', timeZone: 'GMT', timeZoneName: 'short' };\n  return dateObj.toLocaleString('en-US', options);\n}\n\nconst inputTimestamp = $('RSS Feed Trigger').item.json.pubDate;\nconst convertedTimestamp = convertTimestamp(inputTimestamp);\n\nconst inputData = $('RSS Feed Trigger').item.json.content;\n\n// Regex pattern to match the <img src> URL\nconst regex = /<img[^>]+src=\"([^\">]+)\"/;\n\n// Extract the <img src> URL using regex\nconst match = inputData.match(regex);\nconst imgSrcUrl = match ? match[1] : '';\n\n// Convert the URL according to the given constraints\nconst convertedUrlInit = imgSrcUrl.replace(/\\/data\\/preview\\/([A-Za-z0-9]+)\\/([A-Za-z0-9]+)\\/([A-Za-z0-9]+\\.[A-Za-z0-9]+)$/, '/image/$3');\n\nconst convertedUrlFinal = convertedUrlInit.replace(\"assets\",\"files\");\n\n\nvar body = {\n  embeds: [\n    {\n      color: 14837107,\n      author: {\n        name: 'Blue Archive',\n        url: 'https://bluearchive.nexon.com/home',\n        icon_url:\n          'https://pbs.twimg.com/profile_images/1509908462553100294/qKzWCkVR_400x400.png',\n      },\n      title: $('RSS Feed Trigger').item.json.title,\n      url: $('RSS Feed Trigger').item.json.link,\n      image: {\n        url: convertedUrlFinal,\n      },\n      footer: {\n        text: String.prototype.concat(\"Yande.re • \", convertedTimestamp, \" • \", $('RSS Feed Trigger').item.json.author),\n        icon_url: 'https://cdn.myanimelist.net/images/characters/8/269729.jpg',\n      }\n    }\n  ]\n};\n\nreturn { body };"
+        "jsCode": "function convertTimestamp(inputTimestamp) {\n  const dateObj = new Date(inputTimestamp);\n  const options = { weekday: 'short', day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit', timeZone: 'GMT', timeZoneName: 'short' };\n  return dateObj.toLocaleString('en-US', options);\n}\n\nconst inputTimestamp = $('RSS Feed Read').item.json.pubDate;\nconst convertedTimestamp = convertTimestamp(inputTimestamp);\n\nconst inputData = $('RSS Feed Read').item.json.content;\n\n// Regex pattern to match the <img src> URL\nconst regex = /<img[^>]+src=\"([^\">]+)\"/;\n\n// Extract the <img src> URL using regex\nconst match = inputData.match(regex);\nconst imgSrcUrl = match ? match[1] : '';\n\n// Convert the URL according to the given constraints\nconst convertedUrlInit = imgSrcUrl.replace(/\\/data\\/preview\\/([A-Za-z0-9]+)\\/([A-Za-z0-9]+)\\/([A-Za-z0-9]+\\.[A-Za-z0-9]+)$/, '/image/$3');\n\nconst convertedUrlFinal = convertedUrlInit.replace(\"assets\",\"files\");\n\n\nvar body = {\n  embeds: [\n    {\n      color: 14837107,\n      author: {\n        name: 'Blue Archive',\n        url: 'https://bluearchive.nexon.com/home',\n        icon_url:\n          'https://pbs.twimg.com/profile_images/1509908462553100294/qKzWCkVR_400x400.png',\n      },\n      title: $('RSS Feed Read').item.json.title,\n      url: $('RSS Feed Read').item.json.link,\n      image: {\n        url: convertedUrlFinal,\n      },\n      footer: {\n        text: String.prototype.concat(\"Yande.re • \", convertedTimestamp, \" • \", $('RSS Feed Read').item.json.author),\n        icon_url: 'https://cdn.myanimelist.net/images/characters/8/269729.jpg',\n      }\n    }\n  ]\n};\n\nreturn { body };"
       },
       "id": "b56ca396-d598-4a7f-acdb-3a9845a257a1",
       "name": "Code",
       "type": "n8n-nodes-base.code",
       "typeVersion": 1,
       "position": [
-        980,
-        380
+        1240,
+        560
       ]
     },
     {
@@ -22,37 +22,77 @@
         "sendBody": true,
         "specifyBody": "json",
         "jsonBody": "={{ $json.body }}",
-        "options": {}
+        "options": {
+          "batching": {
+            "batch": {
+              "batchSize": 10,
+              "batchInterval": 10000
+            }
+          }
+        }
       },
       "id": "8f2e9a4d-7a42-450c-8063-0b8cecedc50c",
       "name": "HTTP Request",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.1,
       "position": [
-        1160,
-        380
+        1420,
+        560
       ]
     },
     {
       "parameters": {
-        "pollTimes": {
-          "item": [
-            {
-              "mode": "everyHour",
-              "minute": 30
-            }
-          ]
-        },
-        "feedUrl": "https://yande.re/post/atom?tags=blue_archive"
+        "url": "https://yande.re/post/atom?tags=blue_archive",
+        "options": {}
       },
-      "id": "1f5782a7-30f8-4629-a788-8543125acc2e",
-      "name": "RSS Feed Trigger",
-      "type": "n8n-nodes-base.rssFeedReadTrigger",
+      "name": "RSS Feed Read",
+      "type": "n8n-nodes-base.rssFeedRead",
       "typeVersion": 1,
       "position": [
         800,
-        380
+        560
+      ],
+      "id": "ee4cd0f4-e05b-4928-ac9a-479ecabca5d3"
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "hours",
+              "triggerAtMinute": 40
+            }
+          ]
+        }
+      },
+      "id": "74ffedee-410a-486c-9c11-d35816cd8bfa",
+      "name": "Schedule Trigger",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        620,
+        560
       ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "dateTime": [
+            {
+              "value1": "={{$json[\"isoDate\"]}}",
+              "value2": "={{ $now.minus({hours: 1}) }}"
+            }
+          ]
+        }
+      },
+      "name": "New post check",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [
+        1020,
+        560
+      ],
+      "id": "a59c7163-8069-49d9-b2b1-19a70fda4f5b"
     }
   ],
   "pinData": {},
@@ -68,7 +108,29 @@
         ]
       ]
     },
-    "RSS Feed Trigger": {
+    "RSS Feed Read": {
+      "main": [
+        [
+          {
+            "node": "New post check",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "RSS Feed Read",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "New post check": {
       "main": [
         [
           {
@@ -81,11 +143,16 @@
     }
   },
   "active": true,
-  "settings": {},
-  "versionId": "7e9dcc45-40cd-4287-a644-61654d8cd67f",
-  "id": "22",
+  "settings": {
+    "saveManualExecutions": true,
+    "callerPolicy": "workflowsFromSameOwner",
+    "executionOrder": "v1"
+  },
+  "versionId": "aea64c49-00fc-4b99-802d-f64e9582ab75",
   "meta": {
+    "templateCredsSetupCompleted": true,
     "instanceId": "f3e8646dc25bb703680f7fd48308e56289d71dc10dc3ea0c5d57254342b6a676"
   },
+  "id": "22",
   "tags": []
 }
