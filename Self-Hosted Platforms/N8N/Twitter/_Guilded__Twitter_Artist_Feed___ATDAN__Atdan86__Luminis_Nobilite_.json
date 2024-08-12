@@ -12,7 +12,7 @@
       "typeVersion": 1,
       "position": [
         880,
-        380
+        620
       ]
     },
     {
@@ -37,7 +37,7 @@
       "typeVersion": 4.1,
       "position": [
         1060,
-        380
+        620
       ]
     },
     {
@@ -49,15 +49,15 @@
             }
           ]
         },
-        "feedUrl": "https://farside.link/nitter/Atdan86/rss"
+        "feedUrl": "http://REDACTED/i/?a=rss&get=f_17&state=3"
       },
-      "id": "6f07c43b-ef43-459b-bf9c-971d49149d29",
+      "id": "eece6beb-9265-4d96-895f-d1763eb638ba",
       "name": "RSS Feed Trigger",
       "type": "n8n-nodes-base.rssFeedReadTrigger",
       "typeVersion": 1,
       "position": [
         700,
-        380
+        620
       ]
     }
   ],
@@ -92,7 +92,7 @@
     "callerPolicy": "workflowsFromSameOwner",
     "executionOrder": "v1"
   },
-  "versionId": "c84b4b88-8114-46bb-b83b-eea835dc6b21",
+  "versionId": "afd700dd-da6c-4f97-b5e7-bb1919f03ef7",
   "meta": {
     "templateCredsSetupCompleted": true,
     "instanceId": "f3e8646dc25bb703680f7fd48308e56289d71dc10dc3ea0c5d57254342b6a676"
