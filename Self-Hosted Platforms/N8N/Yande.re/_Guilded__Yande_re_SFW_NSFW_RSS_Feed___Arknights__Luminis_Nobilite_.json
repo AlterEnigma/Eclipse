@@ -4,15 +4,15 @@
     {
       "parameters": {
         "mode": "runOnceForEachItem",
-        "jsCode": "function convertTimestamp(inputTimestamp) {\n  const dateObj = new Date(inputTimestamp);\n  const options = { weekday: 'short', day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit', timeZone: 'GMT', timeZoneName: 'short' };\n  return dateObj.toLocaleString('en-US', options);\n}\n\nconst inputTimestamp = $('RSS Feed Read').item.json.pubDate;\nconst convertedTimestamp = convertTimestamp(inputTimestamp);\n\nconst inputData = $('RSS Feed Read').item.json.content;\n\n// Regex pattern to match the <img src> URL\nconst regex = /<img[^>]+src=\"([^\">]+)\"/;\n\n// Extract the <img src> URL using regex\nconst match = inputData.match(regex);\nconst imgSrcUrl = match ? match[1] : '';\n\n// Convert the URL according to the given constraints\nconst convertedUrlInit = imgSrcUrl.replace(/\\/data\\/preview\\/([A-Za-z0-9]+)\\/([A-Za-z0-9]+)\\/([A-Za-z0-9]+\\.[A-Za-z0-9]+)$/, '/image/$3');\n\nconst convertedUrlFinal = convertedUrlInit.replace(\"assets\",\"files\");\n\n\nvar body = {\n  embeds: [\n    {\n      color: 14837107,\n      author: {\n        name: 'Arknights',\n        url: 'https://www.arknights.global/',\n        icon_url:\n          'https://pbs.twimg.com/profile_images/1265563742626107392/zjjzBeIs_400x400.jpg',\n      },\n      title: $('RSS Feed Read').item.json.title,\n      url: $('RSS Feed Read').item.json.link,\n      image: {\n        url: convertedUrlFinal,\n      },\n      footer: {\n        text: String.prototype.concat(\"Yande.re • \", convertedTimestamp, \" • \", $('RSS Feed Read').item.json.author),\n        icon_url: 'https://cdn.myanimelist.net/images/characters/8/269729.jpg',\n      }\n    }\n  ]\n};\n\nreturn { body };"
+        "jsCode": "function convertTimestamp(inputTimestamp) {\n  const dateObj = new Date(inputTimestamp);\n  const options = { weekday: 'short', day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit', timeZone: 'GMT', timeZoneName: 'short' };\n  return dateObj.toLocaleString('en-US', options);\n}\n\nconst inputTimestamp = $('RSS Feed Trigger').item.json.pubDate;\nconst convertedTimestamp = convertTimestamp(inputTimestamp);\n\nconst inputData = $('RSS Feed Trigger').item.json.content;\n\n// Regex pattern to match the <img src> URL\nconst regex = /<img[^>]+src=\"([^\">]+)\"/;\n\n// Extract the <img src> URL using regex\nconst match = inputData.match(regex);\nconst imgSrcUrl = match ? match[1] : '';\n\n// Convert the URL according to the given constraints\nconst convertedUrlInit = imgSrcUrl.replace(/\\/data\\/preview\\/([A-Za-z0-9]+)\\/([A-Za-z0-9]+)\\/([A-Za-z0-9]+\\.[A-Za-z0-9]+)$/, '/image/$3');\n\nconst convertedUrlFinal = convertedUrlInit.replace(\"assets\",\"files\");\n\n\nvar body = {\n  embeds: [\n    {\n      color: 14837107,\n      author: {\n        name: 'Arknights',\n        url: 'https://www.arknights.global/',\n        icon_url:\n          'https://pbs.twimg.com/profile_images/1265563742626107392/zjjzBeIs_400x400.jpg',\n      },\n      title: $('RSS Feed Trigger').item.json.title,\n      url: $('RSS Feed Trigger').item.json.link,\n      image: {\n        url: convertedUrlFinal,\n      },\n      footer: {\n        text: String.prototype.concat(\"Yande.re • \", convertedTimestamp, \" • \", $('RSS Feed Trigger').item.json.author),\n        icon_url: 'https://cdn.myanimelist.net/images/characters/8/269729.jpg',\n      }\n    }\n  ]\n};\n\nreturn { body };"
       },
       "id": "4aebcbf6-421b-4664-832e-0b45de254e2a",
       "name": "Code",
       "type": "n8n-nodes-base.code",
       "typeVersion": 1,
       "position": [
-        840,
-        380
+        640,
+        440
       ]
     },
     {
@@ -36,63 +36,30 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.1,
       "position": [
-        1020,
-        380
+        820,
+        440
       ]
     },
     {
       "parameters": {
-        "url": "https://yande.re/post/atom?tags=arknights",
-        "options": {}
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyHour",
+              "minute": 40
+            }
+          ]
+        },
+        "feedUrl": "https://yande.re/post/atom?tags=arknights"
       },
-      "name": "RSS Feed Read",
-      "type": "n8n-nodes-base.rssFeedRead",
+      "id": "4e7c1c56-bb89-4de1-a986-41a07587f35f",
+      "name": "RSS Feed Trigger",
+      "type": "n8n-nodes-base.rssFeedReadTrigger",
       "typeVersion": 1,
       "position": [
         460,
-        380
-      ],
-      "id": "1db07c5f-84b2-4059-8a56-ee1e7c604860"
-    },
-    {
-      "parameters": {
-        "rule": {
-          "interval": [
-            {
-              "field": "hours",
-              "triggerAtMinute": 40
-            }
-          ]
-        }
-      },
-      "id": "d42f1853-c90b-409e-bb85-a43f78d20c18",
-      "name": "Schedule Trigger",
-      "type": "n8n-nodes-base.scheduleTrigger",
-      "typeVersion": 1.1,
-      "position": [
-        280,
-        380
+        440
       ]
-    },
-    {
-      "parameters": {
-        "conditions": {
-          "dateTime": [
-            {
-              "value1": "={{$json[\"isoDate\"]}}",
-              "value2": "={{ $now.minus({hours: 1}) }}"
-            }
-          ]
-        }
-      },
-      "name": "New post check",
-      "type": "n8n-nodes-base.if",
-      "typeVersion": 1,
-      "position": [
-        640,
-        380
-      ],
-      "id": "b7e1914c-316d-4581-ad53-895c47e84f65"
     }
   ],
   "pinData": {},
@@ -108,29 +75,7 @@
         ]
       ]
     },
-    "RSS Feed Read": {
-      "main": [
-        [
-          {
-            "node": "New post check",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Schedule Trigger": {
-      "main": [
-        [
-          {
-            "node": "RSS Feed Read",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "New post check": {
+    "RSS Feed Trigger": {
       "main": [
         [
           {
@@ -148,7 +93,7 @@
     "callerPolicy": "workflowsFromSameOwner",
     "executionOrder": "v1"
   },
-  "versionId": "81fc40c4-033e-408f-bfa6-44d2a69b23fa",
+  "versionId": "f2eb1607-ff63-4b08-9c6c-662bc3415ef4",
   "meta": {
     "templateCredsSetupCompleted": true,
     "instanceId": "f3e8646dc25bb703680f7fd48308e56289d71dc10dc3ea0c5d57254342b6a676"
