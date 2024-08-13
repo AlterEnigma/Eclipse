@@ -11,8 +11,8 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 1,
       "position": [
-        880,
-        380
+        920,
+        600
       ]
     },
     {
@@ -36,8 +36,8 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.1,
       "position": [
-        1060,
-        380
+        1100,
+        600
       ]
     },
     {
@@ -49,15 +49,15 @@
             }
           ]
         },
-        "feedUrl": "https://farside.link/nitter/CHIARA63710634/rss"
+        "feedUrl": "http://REDACTED/i/?a=rss&get=f_19&state=3"
       },
-      "id": "5c325fd9-cf22-4ef7-825b-0e7fc01eb1e3",
+      "id": "83b16212-ed59-47cd-b70f-70f959e011de",
       "name": "RSS Feed Trigger",
       "type": "n8n-nodes-base.rssFeedReadTrigger",
       "typeVersion": 1,
       "position": [
-        700,
-        380
+        740,
+        600
       ]
     }
   ],
@@ -92,7 +92,7 @@
     "callerPolicy": "workflowsFromSameOwner",
     "executionOrder": "v1"
   },
-  "versionId": "9d2b276f-f961-4d25-b162-c025c8a2125e",
+  "versionId": "49820db2-c5de-49da-8fa0-eb18bd935000",
   "meta": {
     "templateCredsSetupCompleted": true,
     "instanceId": "f3e8646dc25bb703680f7fd48308e56289d71dc10dc3ea0c5d57254342b6a676"
