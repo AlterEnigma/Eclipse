@@ -11,8 +11,8 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 1,
       "position": [
-        880,
-        380
+        860,
+        420
       ]
     },
     {
@@ -36,8 +36,8 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.1,
       "position": [
-        1060,
-        380
+        1040,
+        420
       ]
     },
     {
@@ -49,15 +49,15 @@
             }
           ]
         },
-        "feedUrl": "https://farside.link/nitter/chaesuart/rss"
+        "feedUrl": "http://REDACTED/i/?a=rss&get=f_18&state=3"
       },
-      "id": "aba2a896-dbb0-4aac-8893-11939c3afc25",
+      "id": "cd1862ab-7cae-4384-b8f0-93e0c60acbe2",
       "name": "RSS Feed Trigger",
       "type": "n8n-nodes-base.rssFeedReadTrigger",
       "typeVersion": 1,
       "position": [
-        700,
-        380
+        680,
+        420
       ]
     }
   ],
@@ -92,7 +92,7 @@
     "callerPolicy": "workflowsFromSameOwner",
     "executionOrder": "v1"
   },
-  "versionId": "12f8b694-b44c-40a0-8b28-3f3964f50480",
+  "versionId": "4224bcc6-bcd6-4d98-b722-ea98b04c04f2",
   "meta": {
     "templateCredsSetupCompleted": true,
     "instanceId": "f3e8646dc25bb703680f7fd48308e56289d71dc10dc3ea0c5d57254342b6a676"
