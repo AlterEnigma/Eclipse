@@ -1,13 +1,13 @@
 # Eclipse
 The Eclipse project main repository.
 
-## Template Documentation
+## Workflow Documentation
 The Eclipse project repository contains a series of automation workflows for different services, namely cloud based automation services like IFTTT and Make (previously Integromat) and also self-hosted platforms like N8N. N8N is currently the primary automation software for this repository, so you will find most of the up to date workflows and templates for this particular service.
 
 ### On N8N and Make Workflows
 These workflows are given as-is and are almost certainly outdated, with no guarantee of them working on the latest versions of their respective services. These were mostly created as initial automation experiments, so expect a lot of inconsistencies with these workflows.
 
-## How to Use N8N Templates
+## How to Use N8N Workflows
 First, you need to know that for this particular project, the Eclipse Project, no publicly accessible instance of the service is provided, which in this case means that you will need to self-host N8N using your own hardware and network infrastructure.
 
 - Setting up N8N Server
