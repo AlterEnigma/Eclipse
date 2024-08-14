@@ -12,8 +12,11 @@ First, you need to know that for this particular project, the Eclipse Project, n
 
 - Setting up N8N Server
 This section is entirely up to you and your specific needs and requirements. However, I'd recommend to setup your N8N server instance with Docker-compose in queue mode, for scalability reasons, if your hardware supports it. You can consult the following N8N documentation URLs to inform yourself of the possible benefits that you can have with this setup:
+
 https://docs.n8n.io/hosting/scaling/queue-mode/
+
 Here's the documentation URL for information relating to docker-compose for N8N:
+
 https://docs.n8n.io/hosting/installation/server-setups/docker-compose/
 
 - Importing Workflows to your N8N Instance
