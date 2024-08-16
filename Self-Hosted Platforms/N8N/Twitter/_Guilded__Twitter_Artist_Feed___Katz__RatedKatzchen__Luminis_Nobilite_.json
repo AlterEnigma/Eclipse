@@ -11,8 +11,8 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 1,
       "position": [
-        880,
-        380
+        860,
+        400
       ]
     },
     {
@@ -36,8 +36,8 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.1,
       "position": [
-        1060,
-        380
+        1040,
+        400
       ]
     },
     {
@@ -49,15 +49,15 @@
             }
           ]
         },
-        "feedUrl": "https://farside.link/nitter/ratedkatzchen/rss"
+        "feedUrl": "http://REDACTED/i/?a=rss&get=f_20&state=3"
       },
-      "id": "8998203f-8f1a-4f5e-9a20-b92e5356a8e1",
+      "id": "d1f40b9c-5529-40c8-a88a-76affd076058",
       "name": "RSS Feed Trigger",
       "type": "n8n-nodes-base.rssFeedReadTrigger",
       "typeVersion": 1,
       "position": [
-        700,
-        380
+        680,
+        400
       ]
     }
   ],
@@ -92,7 +92,7 @@
     "callerPolicy": "workflowsFromSameOwner",
     "executionOrder": "v1"
   },
-  "versionId": "01dad1f5-d55f-4673-95dd-308450917b2b",
+  "versionId": "f2bd8830-1c0a-45dd-ac35-e4fbc20e5808",
   "meta": {
     "templateCredsSetupCompleted": true,
     "instanceId": "f3e8646dc25bb703680f7fd48308e56289d71dc10dc3ea0c5d57254342b6a676"
