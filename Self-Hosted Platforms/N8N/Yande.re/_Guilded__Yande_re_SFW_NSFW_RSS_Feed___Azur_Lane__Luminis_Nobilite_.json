@@ -3,16 +3,23 @@
   "nodes": [
     {
       "parameters": {
-        "mode": "runOnceForEachItem",
-        "jsCode": "function convertTimestamp(inputTimestamp) {\n  const dateObj = new Date(inputTimestamp);\n  const options = { weekday: 'short', day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit', timeZone: 'GMT', timeZoneName: 'short' };\n  return dateObj.toLocaleString('en-US', options);\n}\n\nconst inputTimestamp = $('RSS Feed Read').item.json.pubDate;\nconst convertedTimestamp = convertTimestamp(inputTimestamp);\n\nconst inputData = $('RSS Feed Read').item.json.content;\n\n// Regex pattern to match the <img src> URL\nconst regex = /<img[^>]+src=\"([^\">]+)\"/;\n\n// Extract the <img src> URL using regex\nconst match = inputData.match(regex);\nconst imgSrcUrl = match ? match[1] : '';\n\n// Convert the URL according to the given constraints\nconst convertedUrlInit = imgSrcUrl.replace(/\\/data\\/preview\\/([A-Za-z0-9]+)\\/([A-Za-z0-9]+)\\/([A-Za-z0-9]+\\.[A-Za-z0-9]+)$/, '/image/$3');\n\nconst convertedUrlFinal = convertedUrlInit.replace(\"assets\",\"files\");\n\n\nvar body = {\n  embeds: [\n    {\n      color: 14837107,\n      author: {\n        name: 'Azur Lane',\n        url: 'https://azurlane.yo-star.com',\n        icon_url:\n          'https://pbs.twimg.com/profile_images/1651413354660130817/K9iOcejt_400x400.jpg',\n      },\n      title: $('RSS Feed Read').item.json.title,\n      url: $('RSS Feed Read').item.json.link,\n      image: {\n        url: convertedUrlFinal,\n      },\n      footer: {\n        text: String.prototype.concat(\"Yande.re • \", convertedTimestamp, \" • \", $('RSS Feed Read').item.json.author),\n        icon_url: 'https://cdn.myanimelist.net/images/characters/8/269729.jpg',\n      }\n    }\n  ]\n};\n\nreturn { body };"
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyHour",
+              "minute": 40
+            }
+          ]
+        },
+        "feedUrl": "https://yande.re/post/atom?tags=azur_lane"
       },
-      "id": "ed5e1c33-d015-4c15-8568-e4655ebb9ab4",
-      "name": "Code",
-      "type": "n8n-nodes-base.code",
+      "id": "7b5d07c6-a609-495a-b026-9f116be130f6",
+      "name": "RSS Feed Trigger",
+      "type": "n8n-nodes-base.rssFeedReadTrigger",
       "typeVersion": 1,
       "position": [
-        1140,
-        420
+        500,
+        460
       ]
     },
     {
@@ -32,109 +39,107 @@
         }
       },
       "id": "9cdb22b1-2214-4b63-bfe3-b3ff2c5f33ae",
-      "name": "HTTP Request",
+      "name": "HTTP Request - Guilded",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.1,
       "position": [
-        1320,
-        420
+        1340,
+        460
       ]
     },
     {
       "parameters": {
-        "url": "https://yande.re/post/atom?tags=azur_lane",
+        "mode": "runOnceForEachItem",
+        "jsCode": "function convertTimestamp(inputTimestamp) {\n  const dateObj = new Date(inputTimestamp);\n  const options = { weekday: 'short', day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit', timeZone: 'GMT', timeZoneName: 'short' };\n  return dateObj.toLocaleString('en-US', options);\n}\n\nconst inputTimestamp = $('RSS Feed Trigger').item.json.pubDate;\nconst convertedTimestamp = convertTimestamp(inputTimestamp);\n\n\nvar body = {\n  embeds: [\n    {\n      color: 14837107,\n      author: {\n        name: 'Azur Lane',\n        url: 'https://azurlane.yo-star.com',\n        icon_url:\n          'https://pbs.twimg.com/profile_images/1651413354660130817/K9iOcejt_400x400.jpg',\n      },\n      title: $('RSS Feed Trigger').item.json.title,\n      url: $('RSS Feed Trigger').item.json.link,\n      image: {\n        url: $('HTML - Extract OG Img URL Metaproperty').item.json.og_imgURL,\n      },\n      footer: {\n        text: String.prototype.concat(\"Yande.re • \", convertedTimestamp, \" • \", $('RSS Feed Trigger').item.json.author),\n        icon_url: 'https://cdn.myanimelist.net/images/characters/8/269729.jpg',\n      }\n    }\n  ]\n};\n\nreturn { body };"
+      },
+      "id": "ed5e1c33-d015-4c15-8568-e4655ebb9ab4",
+      "name": "Main Driver Code",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 1,
+      "position": [
+        1140,
+        460
+      ]
+    },
+    {
+      "parameters": {
+        "url": "={{ $json.link }}",
         "options": {}
       },
-      "name": "RSS Feed Read",
-      "type": "n8n-nodes-base.rssFeedRead",
-      "typeVersion": 1,
+      "id": "f93bf901-3713-4dfe-a1e0-3e1f07243d6b",
+      "name": "Yande.re - Request Post HTML Content",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
       "position": [
-        760,
-        420
-      ],
-      "id": "413ad5a3-4fc8-48df-9762-986ca2653077"
-    },
-    {
-      "parameters": {
-        "rule": {
-          "interval": [
-            {
-              "field": "hours",
-              "triggerAtMinute": 40
-            }
-          ]
-        }
-      },
-      "id": "69cc7a37-1665-49e6-af05-b021e9d686bf",
-      "name": "Schedule Trigger",
-      "type": "n8n-nodes-base.scheduleTrigger",
-      "typeVersion": 1.1,
-      "position": [
-        580,
-        420
+        720,
+        460
       ]
     },
     {
       "parameters": {
-        "conditions": {
-          "dateTime": [
+        "operation": "extractHtmlContent",
+        "extractionValues": {
+          "values": [
             {
-              "value1": "={{$json[\"isoDate\"]}}",
-              "value2": "={{ $now.minus({hours: 1}) }}"
+              "key": "og_imgURL",
+              "cssSelector": "meta[property=\"og:image\"]",
+              "returnValue": "attribute",
+              "attribute": "content"
             }
           ]
-        }
+        },
+        "options": {}
       },
-      "name": "New post check",
-      "type": "n8n-nodes-base.if",
-      "typeVersion": 1,
+      "id": "815ebe3e-45db-4799-8fd5-200bc24efc78",
+      "name": "HTML - Extract OG Img URL Metaproperty",
+      "type": "n8n-nodes-base.html",
+      "typeVersion": 1.2,
       "position": [
         940,
-        420
-      ],
-      "id": "b35550c8-ae4e-40f8-9172-3cabbbd29418"
+        460
+      ]
     }
   ],
   "pinData": {},
   "connections": {
-    "Code": {
+    "RSS Feed Trigger": {
       "main": [
         [
           {
-            "node": "HTTP Request",
+            "node": "Yande.re - Request Post HTML Content",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "RSS Feed Read": {
+    "Main Driver Code": {
       "main": [
         [
           {
-            "node": "New post check",
+            "node": "HTTP Request - Guilded",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Schedule Trigger": {
+    "Yande.re - Request Post HTML Content": {
       "main": [
         [
           {
-            "node": "RSS Feed Read",
+            "node": "HTML - Extract OG Img URL Metaproperty",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "New post check": {
+    "HTML - Extract OG Img URL Metaproperty": {
       "main": [
         [
           {
-            "node": "Code",
+            "node": "Main Driver Code",
             "type": "main",
             "index": 0
           }
@@ -148,7 +153,7 @@
     "callerPolicy": "workflowsFromSameOwner",
     "executionOrder": "v1"
   },
-  "versionId": "402b6b28-d776-40bf-ad1f-c967d098eeec",
+  "versionId": "ceca4fbc-eb98-4d06-9daf-5d7a01911cf7",
   "meta": {
     "templateCredsSetupCompleted": true,
     "instanceId": "f3e8646dc25bb703680f7fd48308e56289d71dc10dc3ea0c5d57254342b6a676"
