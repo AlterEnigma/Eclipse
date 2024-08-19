@@ -4,15 +4,15 @@
     {
       "parameters": {
         "mode": "runOnceForEachItem",
-        "jsCode": "function convertTimestamp(inputTimestamp) {\n  const dateObj = new Date(inputTimestamp);\n  const options = { weekday: 'short', day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit', timeZone: 'GMT', timeZoneName: 'short' };\n  return dateObj.toLocaleString('en-US', options);\n}\n\nconst inputTimestamp = $('RSS Feed Read').item.json.pubDate;\nconst convertedTimestamp = convertTimestamp(inputTimestamp);\n\nconst inputData = $('RSS Feed Read').item.json.content;\n\n// Regex pattern to match the <img src> URL\nconst regex = /<img[^>]+src=\"([^\">]+)\"/;\n\n// Extract the <img src> URL using regex\nconst match = inputData.match(regex);\nconst imgSrcUrl = match ? match[1] : '';\n\n// Convert the URL according to the given constraints\nconst convertedUrlInit = imgSrcUrl.replace(/\\/data\\/preview\\/([A-Za-z0-9]+)\\/([A-Za-z0-9]+)\\/([A-Za-z0-9]+\\.[A-Za-z0-9]+)$/, '/image/$3');\n\nconst convertedUrlFinal = convertedUrlInit.replace(\"assets\",\"files\");\n\n\nvar body = {\n  embeds: [\n    {\n      color: 14837107,\n      author: {\n        name: 'Fate/Grand Order',\n        url: 'https://fate-go.us/',\n        icon_url:\n          'https://i.imgur.com/ZBbqbDx.png',\n      },\n      title: $('RSS Feed Read').item.json.title,\n      url: $('RSS Feed Read').item.json.link,\n      image: {\n        url: convertedUrlFinal,\n      },\n      footer: {\n        text: String.prototype.concat(\"Yande.re • \", convertedTimestamp, \" • \", $('RSS Feed Read').item.json.author),\n        icon_url: 'https://cdn.myanimelist.net/images/characters/8/269729.jpg',\n      }\n    }\n  ]\n};\n\nreturn { body };"
+        "jsCode": "function convertTimestamp(inputTimestamp) {\n  const dateObj = new Date(inputTimestamp);\n  const options = { weekday: 'short', day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit', timeZone: 'GMT', timeZoneName: 'short' };\n  return dateObj.toLocaleString('en-US', options);\n}\n\nconst inputTimestamp = $('RSS Feed Trigger').item.json.pubDate;\nconst convertedTimestamp = convertTimestamp(inputTimestamp);\n\n\nvar body = {\n  embeds: [\n    {\n      color: 14837107,\n      author: {\n        name: 'Fate/Grand Order',\n        url: 'https://fate-go.us/',\n        icon_url:\n          'https://unavatar.io/twitter/FateGO_USA?fallback=https://raw.githubusercontent.com/LuminisNobilite/Eclipse/main/Assets/Twitter/Twitter%20Gaming%20Feeds/Avatars/%40FateGO_USA_400x400.jpg',\n      },\n      title: $('RSS Feed Trigger').item.json.title,\n      url: $('RSS Feed Trigger').item.json.link,\n      image: {\n        url: $('HTML - Extract OG Img URL Metaproperty').item.json.og_imgURL,\n      },\n      footer: {\n        text: String.prototype.concat(\"Yande.re • \", convertedTimestamp, \" • \", $('RSS Feed Trigger').item.json.author),\n        icon_url: 'https://cdn.myanimelist.net/images/characters/8/269729.jpg',\n      }\n    }\n  ]\n};\n\nreturn { body };"
       },
       "id": "04c53924-8dc5-4cd5-93f9-37fb8a4ed71b",
       "name": "Code",
       "type": "n8n-nodes-base.code",
       "typeVersion": 1,
       "position": [
-        1220,
-        380
+        1180,
+        420
       ]
     },
     {
@@ -36,63 +36,68 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.1,
       "position": [
-        1400,
-        380
+        1360,
+        420
       ]
     },
     {
       "parameters": {
-        "url": "https://yande.re/post/atom?tags=fate%2Fgrand_order",
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyHour",
+              "minute": 40
+            }
+          ]
+        },
+        "feedUrl": "https://yande.re/post/atom?tags=fate%2Fgrand_order"
+      },
+      "id": "f1dfc901-560c-4e60-92dd-172fb1e9d61f",
+      "name": "RSS Feed Trigger",
+      "type": "n8n-nodes-base.rssFeedReadTrigger",
+      "typeVersion": 1,
+      "position": [
+        600,
+        420
+      ]
+    },
+    {
+      "parameters": {
+        "url": "={{ $json.link }}",
         "options": {}
       },
-      "name": "RSS Feed Read",
-      "type": "n8n-nodes-base.rssFeedRead",
-      "typeVersion": 1,
+      "id": "3936adfa-ee85-46bf-9efd-4a641782c598",
+      "name": "Yande.re - Request Post HTML Content",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
       "position": [
         800,
-        380
-      ],
-      "id": "7ab65a9a-af6d-4f40-9438-ac78e0de1664"
-    },
-    {
-      "parameters": {
-        "rule": {
-          "interval": [
-            {
-              "field": "hours",
-              "triggerAtMinute": 40
-            }
-          ]
-        }
-      },
-      "id": "61684b30-df1d-42e0-8468-5e3cc4e1f5ac",
-      "name": "Schedule Trigger",
-      "type": "n8n-nodes-base.scheduleTrigger",
-      "typeVersion": 1.1,
-      "position": [
-        620,
-        380
+        420
       ]
     },
     {
       "parameters": {
-        "conditions": {
-          "dateTime": [
+        "operation": "extractHtmlContent",
+        "extractionValues": {
+          "values": [
             {
-              "value1": "={{$json[\"isoDate\"]}}",
-              "value2": "={{ $now.minus({hours: 1}) }}"
+              "key": "og_imgURL",
+              "cssSelector": "meta[property=\"og:image\"]",
+              "returnValue": "attribute",
+              "attribute": "content"
             }
           ]
-        }
+        },
+        "options": {}
       },
-      "name": "New post check",
-      "type": "n8n-nodes-base.if",
-      "typeVersion": 1,
+      "id": "ec02a85d-4f1c-41b3-8dec-e802388a520a",
+      "name": "HTML - Extract OG Img URL Metaproperty",
+      "type": "n8n-nodes-base.html",
+      "typeVersion": 1.2,
       "position": [
-        1020,
-        380
-      ],
-      "id": "8887160c-431f-478b-a8bb-b0603eb1b61b"
+        1000,
+        420
+      ]
     }
   ],
   "pinData": {},
@@ -108,29 +113,29 @@
         ]
       ]
     },
-    "RSS Feed Read": {
+    "RSS Feed Trigger": {
       "main": [
         [
           {
-            "node": "New post check",
+            "node": "Yande.re - Request Post HTML Content",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Schedule Trigger": {
+    "Yande.re - Request Post HTML Content": {
       "main": [
         [
           {
-            "node": "RSS Feed Read",
+            "node": "HTML - Extract OG Img URL Metaproperty",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "New post check": {
+    "HTML - Extract OG Img URL Metaproperty": {
       "main": [
         [
           {
@@ -148,7 +153,7 @@
     "callerPolicy": "workflowsFromSameOwner",
     "executionOrder": "v1"
   },
-  "versionId": "200fa429-b5f7-496e-baba-11054a5e657c",
+  "versionId": "cfce0be0-b190-4d90-b5bd-6b50f54cb5d7",
   "meta": {
     "templateCredsSetupCompleted": true,
     "instanceId": "f3e8646dc25bb703680f7fd48308e56289d71dc10dc3ea0c5d57254342b6a676"
