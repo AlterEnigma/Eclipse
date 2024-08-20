@@ -4,7 +4,7 @@
     {
       "parameters": {
         "mode": "runOnceForEachItem",
-        "jsCode": "function convertTimestamp(inputTimestamp) {\n  const dateObj = new Date(inputTimestamp);\n  const options = { weekday: 'short', day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit', timeZone: 'GMT', timeZoneName: 'short' };\n  return dateObj.toLocaleString('en-US', options);\n}\n\nconst inputTimestamp = $('RSS Feed Read').item.json.pubDate;\nconst convertedTimestamp = convertTimestamp(inputTimestamp);\n\nconst inputData = $('RSS Feed Read').item.json.content;\n\n// Regex pattern to match the <img src> URL\nconst regex = /<img[^>]+src=\"([^\">]+)\"/;\n\n// Extract the <img src> URL using regex\nconst match = inputData.match(regex);\nconst imgSrcUrl = match ? match[1] : '';\n\n// Convert the URL according to the given constraints\nconst convertedUrlInit = imgSrcUrl.replace(/\\/data\\/preview\\/([A-Za-z0-9]+)\\/([A-Za-z0-9]+)\\/([A-Za-z0-9]+\\.[A-Za-z0-9]+)$/, '/image/$3');\n\nconst convertedUrlFinal = convertedUrlInit.replace(\"assets\",\"files\");\n\n\nvar body = {\n  embeds: [\n    {\n      color: 14837107,\n      author: {\n        name: 'Hololive',\n        url: 'https://hololivepro.com/en/',\n        icon_url:\n          'https://w0.peakpx.com/wallpaper/702/453/HD-wallpaper-anime-virtual-youtuber-amane-kanata-hololive-thumbnail.jpg',\n      },\n      title: $('RSS Feed Read').item.json.title,\n      url: $('RSS Feed Read').item.json.link,\n      image: {\n        url: convertedUrlFinal,\n      },\n      footer: {\n        text: String.prototype.concat(\"Yande.re • \", convertedTimestamp, \" • \", $('RSS Feed Read').item.json.author),\n        icon_url: 'https://cdn.myanimelist.net/images/characters/8/269729.jpg',\n      }\n    }\n  ]\n};\n\nreturn { body };"
+        "jsCode": "function convertTimestamp(inputTimestamp) {\n  const dateObj = new Date(inputTimestamp);\n  const options = { weekday: 'short', day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit', timeZone: 'GMT', timeZoneName: 'short' };\n  return dateObj.toLocaleString('en-US', options);\n}\n\nconst inputTimestamp = $('RSS Feed Trigger').item.json.pubDate;\nconst convertedTimestamp = convertTimestamp(inputTimestamp);\n\n\nvar body = {\n  embeds: [\n    {\n      color: 14837107,\n      author: {\n        name: 'Hololive',\n        url: 'https://hololivepro.com/en/',\n        icon_url:\n          'https://w0.peakpx.com/wallpaper/702/453/HD-wallpaper-anime-virtual-youtuber-amane-kanata-hololive-thumbnail.jpg',\n      },\n      title: $('RSS Feed Trigger').item.json.title,\n      url: $('RSS Feed Trigger').item.json.link,\n      image: {\n        url: $('HTML - Extract OG Img URL Metaproperty').item.json.og_imgURL,\n      },\n      footer: {\n        text: String.prototype.concat(\"Yande.re • \", convertedTimestamp, \" • \", $('RSS Feed Trigger').item.json.author),\n        icon_url: 'https://cdn.myanimelist.net/images/characters/8/269729.jpg',\n      }\n    }\n  ]\n};\n\nreturn { body };"
       },
       "id": "309fa885-f4a4-4f38-8ec9-4d237b244181",
       "name": "Code",
@@ -42,57 +42,62 @@
     },
     {
       "parameters": {
-        "url": "https://yande.re/post/atom?tags=hololive",
-        "options": {}
-      },
-      "name": "RSS Feed Read",
-      "type": "n8n-nodes-base.rssFeedRead",
-      "typeVersion": 1,
-      "position": [
-        820,
-        420
-      ],
-      "id": "7a7a7e5e-4ae5-4955-ae43-d746fc2e661b"
-    },
-    {
-      "parameters": {
-        "rule": {
-          "interval": [
+        "pollTimes": {
+          "item": [
             {
-              "field": "hours",
-              "triggerAtMinute": 40
+              "mode": "everyHour",
+              "minute": 40
             }
           ]
-        }
+        },
+        "feedUrl": "https://yande.re/post/atom?tags=hololive"
       },
-      "id": "3c65f80b-fe8d-46f7-8b37-0a000c64f16c",
-      "name": "Schedule Trigger",
-      "type": "n8n-nodes-base.scheduleTrigger",
-      "typeVersion": 1.1,
+      "id": "1e8b3dae-eac8-4543-b62d-3b77bbb15d61",
+      "name": "RSS Feed Trigger",
+      "type": "n8n-nodes-base.rssFeedReadTrigger",
+      "typeVersion": 1,
       "position": [
-        640,
+        620,
         420
       ]
     },
     {
       "parameters": {
-        "conditions": {
-          "dateTime": [
+        "url": "={{ $json.link }}",
+        "options": {}
+      },
+      "id": "76e65fa6-07f0-4445-b1bf-59ec3c1814e8",
+      "name": "Yande.re - Request Post HTML Content",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        800,
+        420
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "extractHtmlContent",
+        "extractionValues": {
+          "values": [
             {
-              "value1": "={{$json[\"isoDate\"]}}",
-              "value2": "={{ $now.minus({hours: 1}) }}"
+              "key": "og_imgURL",
+              "cssSelector": "meta[property=\"og:image\"]",
+              "returnValue": "attribute",
+              "attribute": "content"
             }
           ]
-        }
+        },
+        "options": {}
       },
-      "name": "New post check",
-      "type": "n8n-nodes-base.if",
-      "typeVersion": 1,
+      "id": "c72637c6-ecc8-4387-af91-8705517273ec",
+      "name": "HTML - Extract OG Img URL Metaproperty",
+      "type": "n8n-nodes-base.html",
+      "typeVersion": 1.2,
       "position": [
-        1000,
+        1020,
         420
-      ],
-      "id": "565996c1-3bba-49a8-8b92-c015743c013d"
+      ]
     }
   ],
   "pinData": {},
@@ -108,29 +113,29 @@
         ]
       ]
     },
-    "RSS Feed Read": {
+    "Yande.re - Request Post HTML Content": {
       "main": [
         [
           {
-            "node": "New post check",
+            "node": "HTML - Extract OG Img URL Metaproperty",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Schedule Trigger": {
+    "RSS Feed Trigger": {
       "main": [
         [
           {
-            "node": "RSS Feed Read",
+            "node": "Yande.re - Request Post HTML Content",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "New post check": {
+    "HTML - Extract OG Img URL Metaproperty": {
       "main": [
         [
           {
@@ -148,7 +153,7 @@
     "callerPolicy": "workflowsFromSameOwner",
     "executionOrder": "v1"
   },
-  "versionId": "f9cc9dd8-1fad-43ed-a1d1-696f77f6c71c",
+  "versionId": "17fb2414-0f48-4c5b-8559-d6d2ea40f16d",
   "meta": {
     "templateCredsSetupCompleted": true,
     "instanceId": "f3e8646dc25bb703680f7fd48308e56289d71dc10dc3ea0c5d57254342b6a676"
