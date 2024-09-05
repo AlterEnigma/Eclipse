@@ -1,0 +1,156 @@
+{
+  "name": "(Guilded) Anilist Feed - Reisonancia Anime [Luminis Nobilite]",
+  "nodes": [
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "const rssLink = $('RSS Feed Trigger').item.json.link;\nconst animeID = rssLink.match(/anime\\/(\\d+)/)[1];\n\nreturn { animeID };"
+      },
+      "id": "9d81f7b8-6b89-495f-ae37-54a84f3d7db2",
+      "name": "Fetch AnimeID",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        840,
+        460
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://media.guilded.gg/webhooks/REDACTED",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ $json.body }}",
+        "options": {
+          "batching": {
+            "batch": {
+              "batchSize": 10,
+              "batchInterval": 10000
+            }
+          }
+        }
+      },
+      "id": "b5937ec7-cb85-4343-904d-7e399d13da52",
+      "name": "HTTP Request - Guilded Webhook",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        1380,
+        460
+      ]
+    },
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyHour"
+            }
+          ]
+        },
+        "feedUrl": "=https://rfa.mnpn.dev/anime/reisonancia"
+      },
+      "id": "25a749a7-60ed-415e-8a2d-f37d68bf25a0",
+      "name": "RSS Feed Trigger",
+      "type": "n8n-nodes-base.rssFeedReadTrigger",
+      "typeVersion": 1,
+      "position": [
+        660,
+        460
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "function convertTimestamp(inputTimestamp) {\n  const dateObj = new Date(inputTimestamp);\n  const options = {\n    weekday: 'short',\n    day: '2-digit',\n    month: 'short',\n    year: 'numeric',\n    hour: '2-digit',\n    minute: '2-digit',\n    second: '2-digit',\n    timeZone: 'GMT',\n    timeZoneName: 'short'\n  };\n  return dateObj.toLocaleString('en-US', options);\n}\n\nconst inputTimestamp = $('RSS Feed Trigger').item.json.pubDate;\nconst convertedTimestamp = convertTimestamp(inputTimestamp);\n\n// Access the data from the AniList response\nconst animeData = $('HTTP Request - AniList API').item.json.data.Media;\n\n// Format the start and end dates\nconst formatDate = (date) => {\n  if (!date) return '';\n  const { day, month, year } = date;\n  return `${day ? day + ' ' : ''}${month ? new Date(0, month - 1).toLocaleString('en-US', { month: 'short' }) + ' ' : ''}${year || ''}`;\n};\n\n// List of possible fields with conditional checking for null or undefined values\nconst embedFields = [\n  { name: 'Format', value: animeData.format, inline: true },\n  { name: 'Episodes', value: animeData.episodes?.toString(), inline: true },\n  { name: 'Status', value: animeData.status, inline: true },\n  { name: 'Genres', value: animeData.genres?.join(', '), inline: true },\n  { name: 'Start Date', value: formatDate(animeData.startDate), inline: true },\n  { name: 'End Date', value: formatDate(animeData.endDate), inline: true },\n  { name: 'Average Score', value: animeData.averageScore?.toString(), inline: true },\n  { name: 'Studios', value: animeData.studios.nodes.map(studio => studio.name).join(', '), inline: true }\n].filter(field => field.value); // Filter out fields with null/undefined values\n\nvar body = {\n  embeds: [\n    {\n      color: 3035554,\n      author: {\n        name: \"Reisonantia's Recent Anime (AniList)\",\n        url: 'https://anilist.co/user/Reisonancia/',\n        icon_url: 'https://raw.githubusercontent.com/LuminisNobilite/Eclipse/main/Assets/MyAnimeList/Avatars/Reisonantia.webp',\n      },\n      title: animeData.title.romaji, // Using Romaji title from AniList\n      url: `https://anilist.co/anime/${animeData.id}`, // URL to AniList anime page\n      image: {\n        url: animeData.coverImage.extraLarge // Using extraLarge image from AniList\n      },\n      description: $('RSS Feed Trigger').item.json.content,\n      fields: embedFields, // Only includes fields with valid values\n      footer: {\n        text: `AniList • ${convertedTimestamp}`,\n        icon_url: 'https://anilist.co/img/icons/android-chrome-512x512.png',\n      }\n    }\n  ]\n};\n\nreturn { body };\n"
+      },
+      "id": "8c22774e-4418-45b0-a341-e58e4e79f265",
+      "name": "Main Driver Code",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 1,
+      "position": [
+        1200,
+        460
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://graphql.anilist.co",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"query\": \"query ($animeId: Int) { Media(id: $animeId, type: ANIME) { id title { romaji english native } description format episodes status startDate { year month day } endDate { year month day } genres averageScore studios { nodes { name } } coverImage { extraLarge } } }\",\n  \"variables\": {\n    \"animeId\": {{$json[\"animeID\"]}}\n  }\n}\n",
+        "options": {}
+      },
+      "id": "af38ee57-0e3a-45eb-9505-255f74ffea58",
+      "name": "HTTP Request - AniList API",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1020,
+        460
+      ]
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Fetch AnimeID": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request - AniList API",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "RSS Feed Trigger": {
+      "main": [
+        [
+          {
+            "node": "Fetch AnimeID",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Main Driver Code": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request - Guilded Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request - AniList API": {
+      "main": [
+        [
+          {
+            "node": "Main Driver Code",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "saveManualExecutions": true,
+    "callerPolicy": "workflowsFromSameOwner",
+    "executionOrder": "v1"
+  },
+  "versionId": "7e9d6dd4-98c0-42e2-92b4-f43f19f2d0a5",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "f3e8646dc25bb703680f7fd48308e56289d71dc10dc3ea0c5d57254342b6a676"
+  },
+  "id": "rr4N1FCsGifIMbAt",
+  "tags": []
+}
