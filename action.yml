@@ -1,5 +1,5 @@
 name: 'Guilded Github Notifications'
-author: 'Reisonantia'
+author: 'Reisonancia'
 description: 'A GitHub action for sending Guilded notification embed, which can also be customized.'
 inputs:
   webhook-url:

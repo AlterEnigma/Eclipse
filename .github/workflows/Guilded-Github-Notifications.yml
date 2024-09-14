@@ -10,8 +10,8 @@ jobs:
     name: Test Notification
     steps:
       - name: Send Notification
-        uses: LuminisNobilite/Eclipse@main
+        uses: LightCircleLLC/Eclipse@main
         with:
           webhook-url: ${{ secrets.GUILDED_GITHUB_NOTIFICATIONS_WEBHOOK_URL }}
           embed-color: '3093151'
-          footer-icon: 'https://raw.githubusercontent.com/LuminisNobilite/Eclipse/main/Assets/Icons/Guilded/Guilded%20-%20Gold%20Github%20Logo%20v1.png'
+          footer-icon: 'https://raw.githubusercontent.com/LightCircleLLC/Eclipse/main/Assets/Icons/Guilded/Guilded%20-%20Gold%20Github%20Logo%20v1.png'
