@@ -1,0 +1,241 @@
+{
+  "name": "(Guilded) Folding@Home Team Stats Autoflow [Light Circle]",
+  "nodes": [
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "// Function to parse the daily team summary file and extract the data for a specific team\nfunction parseTeamStats(data, targetTeamID) {\n  // Split lines into an array, ignoring the first two header lines\n  const lines = data.split('\\n').slice(2).filter(line => line.trim() !== '');\n\n  // Loop through each line to find the entry for the target team ID\n  for (const line of lines) {\n    const [team, teamname, score, wu] = line.split('\\t');\n    if (team === targetTeamID) {\n      return { team, teamname, score, wu };\n    }\n  }\n  return null; // Return null if no matching team found\n}\n\n// Function to format large numbers with commas and bold text\nfunction formatTeamStats(teamname, score, wu) {\n  return `Team: **${teamname}**\\nScore: **${parseInt(score).toLocaleString()}**\\nWork Units: **${parseInt(wu).toLocaleString()}**`;\n}\n\n// Assuming the content of the daily team summary file is stored in the `data` variable\nconst data = $('Extract from File').item.json.data;\n\n// Extract data for the team with ID 1065856 (Light Circle team)\nconst teamData = parseTeamStats(data, '1065856');\n\nif (teamData) {\n  const formattedTeamStats = formatTeamStats(teamData.teamname, teamData.score, teamData.wu);\n  const inputTimestamp = DateTime.local();\n  const convertedTimestamp = convertTimestamp(inputTimestamp);\n\n  const textMod = String.prototype.concat(\"Folding@Home • \", convertedTimestamp);\n\n  var body = {\n    \"embeds\": [\n      {\n        title: \"Folding@Home Team Statistics\",\n        url: \"https://stats.foldingathome.org/team/1065856\",\n        color: 2044507,\n        fields: [\n          { name: \"Team\", value: teamData.teamname, inline: true },\n          { name: \"Team ID\", value: teamData.team, inline: true },\n          { name: \"Score\", value: parseInt(teamData.score).toLocaleString(), inline: true },\n          { name: \"Work Units\", value: parseInt(teamData.wu).toLocaleString(), inline: true }\n        ],\n        \"description\": \"Scientia Potentia Est\",\n        author: {\n          name: \"Light Circle\",\n          url: \"https://github.com/LightCircleLLC\",\n          icon_url: \"https://raw.githubusercontent.com/LightCircleLLC/Eclipse/main/Assets/Luminis%20Nobilite%20Official%20Branding/Light%20Circle%20Logo%20v1.png\"\n        },\n        footer: {\n          text: textMod,\n          icon_url: \"https://raw.githubusercontent.com/LightCircleLLC/Eclipse/main/Assets/Luminis%20Nobilite%20Official%20Branding/Eclipse%20Project%20Logo%20v1.png\"\n        },\n        thumbnail: {\n          url: \"https://raw.githubusercontent.com/LightCircleLLC/Eclipse/main/Assets/Luminis%20Nobilite%20Official%20Branding/Luminis%20Nobilite%20Logo%20v2.png\"\n        }\n      }\n    ]\n  };\n\n  return { body };\n} else {\n  return { error: \"Team ID 1065856 not found in the data.\" };\n}\n\n// Helper function to convert timestamp to readable format\nfunction convertTimestamp(inputTimestamp) {\n  const dateObj = new Date(inputTimestamp);\n  const options = { weekday: 'short', day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit', timeZone: 'GMT', timeZoneName: 'short' };\n  return dateObj.toLocaleString('en-US', options);\n}\n"
+      },
+      "id": "7b0bd778-a3c0-45d5-ba00-0283e289d1b2",
+      "name": "Code",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 1,
+      "position": [
+        1940,
+        380
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://media.guilded.gg/webhooks/REDACTED",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ $json.body }}",
+        "options": {}
+      },
+      "id": "03f813c1-f667-4720-b859-a02c6a5aa98f",
+      "name": "HTTP Request - Guilded Webhook URL",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        2120,
+        380
+      ]
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {}
+          ]
+        }
+      },
+      "id": "d641952f-4d7a-497f-a767-83f4ba1311a6",
+      "name": "Schedule Trigger",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        720,
+        380
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "text",
+        "options": {}
+      },
+      "id": "f9435fe2-5489-405d-89d1-0aba17bd4de3",
+      "name": "Extract from File",
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1,
+      "position": [
+        1760,
+        380
+      ]
+    },
+    {
+      "parameters": {
+        "url": "https://apps.foldingathome.org/daily_team_summary.txt.bz2",
+        "options": {}
+      },
+      "id": "36313c8b-1ba8-4863-99c5-86a050c8d6f9",
+      "name": "HTTP Request - Folding@Home Website",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        920,
+        380
+      ]
+    },
+    {
+      "parameters": {
+        "fileSelector": "=/tmp/daily_team_summary.txt",
+        "options": {}
+      },
+      "id": "0c025152-934d-4757-b9e6-4645dae45abe",
+      "name": "Read/Write Files from Disk (TXT)",
+      "type": "n8n-nodes-base.readWriteFile",
+      "typeVersion": 1,
+      "position": [
+        1540,
+        380
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "write",
+        "fileName": "=/tmp/{{ $binary.data.fileName }}",
+        "options": {}
+      },
+      "id": "0c753ff1-2b4b-45e7-9233-b082a9ea1cc7",
+      "name": "Read/Write Files from Disk (BIN)",
+      "type": "n8n-nodes-base.readWriteFile",
+      "typeVersion": 1,
+      "position": [
+        1140,
+        380
+      ]
+    },
+    {
+      "parameters": {
+        "command": "=bunzip2 /tmp/{{ $binary.data.fileName }}"
+      },
+      "id": "24bb2112-6dac-48cf-ad17-9e0fd01ca714",
+      "name": "Execute Command (Unzip BZ2)",
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [
+        1320,
+        380
+      ]
+    },
+    {
+      "parameters": {
+        "command": "=rm /tmp/daily_team_summary.txt"
+      },
+      "id": "3060eddb-edd4-4ade-85e9-32d6b9ed44a6",
+      "name": "Execute Command (DELETE .txt File)",
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [
+        2340,
+        380
+      ]
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Code": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request - Guilded Webhook URL",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request - Folding@Home Website",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract from File": {
+      "main": [
+        [
+          {
+            "node": "Code",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request - Folding@Home Website": {
+      "main": [
+        [
+          {
+            "node": "Read/Write Files from Disk (BIN)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read/Write Files from Disk (TXT)": {
+      "main": [
+        [
+          {
+            "node": "Extract from File",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read/Write Files from Disk (BIN)": {
+      "main": [
+        [
+          {
+            "node": "Execute Command (Unzip BZ2)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request - Guilded Webhook URL": {
+      "main": [
+        [
+          {
+            "node": "Execute Command (DELETE .txt File)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Execute Command (Unzip BZ2)": {
+      "main": [
+        [
+          {
+            "node": "Read/Write Files from Disk (TXT)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "saveManualExecutions": true,
+    "callerPolicy": "workflowsFromSameOwner",
+    "executionOrder": "v1"
+  },
+  "versionId": "725cb036-0712-4c7f-aa41-15f9456d3439",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "f3e8646dc25bb703680f7fd48308e56289d71dc10dc3ea0c5d57254342b6a676"
+  },
+  "id": "NdJph5E7kXp7Eok3",
+  "tags": []
+}
