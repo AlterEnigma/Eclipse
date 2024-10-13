@@ -1,0 +1,160 @@
+{
+  "name": "(Guilded) MyAnimeList Feed - Reisonancia Manga [Light Circle]",
+  "nodes": [
+    {
+      "parameters": {
+        "url": "=https://api.jikan.moe/v4/manga/{{$json.mangaID}}",
+        "options": {
+          "batching": {
+            "batch": {
+              "batchSize": 5,
+              "batchInterval": 20000
+            }
+          }
+        }
+      },
+      "id": "24aa8754-0e76-40b5-9085-74ed62957378",
+      "name": "HTTP Request - Jikan.moe API",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        1060,
+        460
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://media.guilded.gg/webhooks/REDACTED",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ $json.body }}",
+        "options": {
+          "batching": {
+            "batch": {
+              "batchSize": 10,
+              "batchInterval": 10000
+            }
+          }
+        }
+      },
+      "id": "4cd71f85-3772-46d4-88f7-02a9f172790d",
+      "name": "HTTP Request - Guilded Webhook",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        1420,
+        460
+      ]
+    },
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyHour",
+              "minute": 10
+            }
+          ]
+        },
+        "feedUrl": "=https://myanimelist.net/rss.php?type=rm&u=Reisonancia"
+      },
+      "id": "95c3205c-53b0-4b0e-8025-66991d2dcb0e",
+      "name": "RSS Feed Trigger",
+      "type": "n8n-nodes-base.rssFeedReadTrigger",
+      "typeVersion": 1,
+      "position": [
+        660,
+        460
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "const rssLink = $('RSS Feed Trigger').item.json.link;\nconst mangaID = rssLink.match(/manga\\/(\\d+)/)[1];\n\nreturn { mangaID };"
+      },
+      "id": "3faa8871-2529-43eb-a39d-03a495304e22",
+      "name": "Fetch MangaID",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        840,
+        460
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "function convertTimestamp(inputTimestamp) {\n  const dateObj = new Date(inputTimestamp);\n  const options = {\n    weekday: 'short',\n    day: '2-digit',\n    month: 'short',\n    year: 'numeric',\n    hour: '2-digit',\n    minute: '2-digit',\n    second: '2-digit',\n    timeZone: 'GMT',\n    timeZoneName: 'short'\n  };\n  return dateObj.toLocaleString('en-US', options);\n}\n\nconst inputTimestamp = $('RSS Feed Trigger').item.json.pubDate;\nconst convertedTimestamp = convertTimestamp(inputTimestamp);\n\nconst mangaData = $('HTTP Request - Jikan.moe API').item.json.data;\n\n// List of possible fields with conditional checking for null or undefined values \nconst embedFields = [\n  { name: 'Type', value: mangaData.type, inline: true },\n  { name: 'Volumes', value: mangaData.volumes?.toString(), inline: true },\n  { name: 'Chapters', value: mangaData.chapters?.toString(), inline: true },\n  { name: 'Status', value: mangaData.status, inline: true },\n  { name: 'Published', value: mangaData.published?.string, inline: true },\n  { name: 'Genre', value: mangaData.genres?.length ? mangaData.genres.map(genre =>`[${genre.name}](${genre.url})`).join(', ') : null, inline: true },\n  { name: 'Themes', value: mangaData.themes?.length ? mangaData.themes.map(theme =>`[${theme.name}](${theme.url})`).join(', ') : null, inline: true },\n  { name: 'Serialization', value: mangaData.serializations?.length ? mangaData.serializations.map(serialization =>`[${serialization.name}](${serialization.url})`).join(', ') : null, inline: true },\n  { name: 'Authors', value: mangaData.authors?.length ? mangaData.authors.map(author =>`[${author.name}](${author.url})`).join(', ') : null, inline: true },\n  { name: 'Score', value: mangaData.score?.toString(), inline: true },\n  { name: 'Ranked', value: mangaData.rank ? `#${mangaData.rank}` : null, inline: true },\n  { name: 'Popularity', value: mangaData.popularity ? `#${mangaData.popularity}` : null, inline: true },\n  { name: 'Members', value: mangaData.members?.toString(), inline: true },\n  { name: 'Favorites', value: mangaData.favorites?.toString(), inline: true }\n].filter(field => field.value); // Filter out fields with null/undefined values\n\n\nvar body = {\n  embeds: [\n    {\n      color: 3035554,\n      author: {\n        name: \"Reisonantia's Recent Manga (MyAnimeList)\",\n        url: 'https://myanimelist.net/profile/Reisonantia',\n        icon_url: 'https://raw.githubusercontent.com/LuminisNobilite/Eclipse/main/Assets/MyAnimeList/Avatars/Reisonantia.webp',\n      },\n      title: mangaData.title || 'Unknown Title',\n      url: mangaData.url,\n      image: {\n        url: mangaData.images.jpg.large_image_url\n      },\n      description: $('RSS Feed Trigger').item.json.content,\n      fields: embedFields, // Only includes fields with valid values\n      footer: {\n        text: `MyAnimeList • ${convertedTimestamp}`,\n        icon_url: 'https://raw.githubusercontent.com/LuminisNobilite/Eclipse/main/Assets/Icons/Guilded/Guilded%20-%20Gold%20MyAnimeList%20Icon%20v1.png',\n      }\n    }\n  ]\n};\n\nreturn { body };"
+      },
+      "id": "c150f111-bca5-405f-906b-f9b14aad9d8e",
+      "name": "Main Driver Code",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 1,
+      "position": [
+        1240,
+        460
+      ]
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "HTTP Request - Jikan.moe API": {
+      "main": [
+        [
+          {
+            "node": "Main Driver Code",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "RSS Feed Trigger": {
+      "main": [
+        [
+          {
+            "node": "Fetch MangaID",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fetch MangaID": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request - Jikan.moe API",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Main Driver Code": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request - Guilded Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "saveManualExecutions": true,
+    "callerPolicy": "workflowsFromSameOwner",
+    "executionOrder": "v1"
+  },
+  "versionId": "a37ba41e-b0e1-4d3e-88e2-f877a6d6d4c1",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "f3e8646dc25bb703680f7fd48308e56289d71dc10dc3ea0c5d57254342b6a676"
+  },
+  "id": "muOHfpm6P0JrgTii",
+  "tags": []
+}
