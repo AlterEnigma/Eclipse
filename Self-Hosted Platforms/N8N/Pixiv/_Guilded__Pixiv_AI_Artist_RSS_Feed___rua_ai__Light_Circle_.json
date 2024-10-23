@@ -1,0 +1,203 @@
+{
+  "name": "(Guilded) Pixiv AI Artist RSS Feed - rua_ai [Light Circle]",
+  "nodes": [
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "function convertTimestamp(inputTimestamp) {\n  const dateObj = new Date(inputTimestamp);\n  const options = {\n    weekday: 'short',\n    day: '2-digit',\n    month: 'short',\n    year: 'numeric',\n    hour: '2-digit',\n    minute: '2-digit',\n    second: '2-digit',\n    timeZone: 'GMT',\n    timeZoneName: 'short',\n  };\n  return dateObj.toLocaleString('en-US', options);\n}\n\n\nconst inputTimestamp = $('RSS Feed Trigger').item.json.pubDate;\nconst convertedTimestamp = convertTimestamp(inputTimestamp);\nconst inputData = $('RSS Feed Trigger').item.json.content;\n// Regex pattern to match the <img src> URL\nconst regex = /<img[^>]+src=\"([^\">]+)\"/g;\nconst imgSrcUrls = [];\nlet match;\n// Extract all <img src> URLs using regex\nwhile ((match = regex.exec(inputData)) !== null) {\n  imgSrcUrls.push(match[1]);\n}\nconst convertedUrls = imgSrcUrls.map((url, index) => {\n  return url;\n});\n\n\nconst maxEmbeds = 10; // Maximum number of embeds to send\nconst totalEmbeds = convertedUrls.length;\nconst numMessages = Math.ceil(totalEmbeds / maxEmbeds);\nconst payloads = [];\n\n\nfor (let i = 0; i < numMessages; i++) {\n  const start = i * maxEmbeds;\n  const end = start + maxEmbeds;\n  const embeds = convertedUrls\n    .slice(start, end)\n    .map((url, index) => {\n      const entryNumber = start + index + 1; // Entry number starts from 1\n      let titleInit = $('RSS Feed Trigger').item.json.title;\n      if (convertedUrls.length > 1) {\n        titleInit = `${titleInit} [${entryNumber}]`;\n      }\n      return {\n        color: 40191,\n        author: {\n          name: $('RSS Feed Trigger').item.json.author,\n          url: 'https://www.pixiv.net/en/users/16582456',\n          icon_url: 'https://raw.githubusercontent.com/LightCircleLLC/Eclipse/refs/heads/main/Assets/Pixiv/%40rua_aiA_400x400.jpg',\n        },\n        title: titleInit,\n        url: $('RSS Feed Trigger').item.json.link,\n        image: {\n          url: url,\n        },\n        footer: {\n          text: String.prototype.concat('Pixiv • ', convertedTimestamp),\n          icon_url: 'https://raw.githubusercontent.com/LightCircleLLC/Eclipse/refs/heads/main/Assets/Icons/Guilded/Guilded%20-%20Gold%20Pixiv%20Icon%20v1.png',\n        },\n      };\n    });\n  const body = { embeds };\n  payloads.push({ body });\n}\n\n\nreturn { payloads };"
+      },
+      "id": "2d48e869-e7fd-4bd9-8fd8-49855eb5338d",
+      "name": "Code",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 1,
+      "position": [
+        840,
+        720
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://media.guilded.gg/webhooks/REDACTED",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ $json.payloads[0].body }}",
+        "options": {}
+      },
+      "id": "57f11c1c-27d4-4977-8515-163a66f20a25",
+      "name": "HTTP Request",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        1280,
+        720
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://media.guilded.gg/webhooks/REDACTED",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ $json.payloads[1].body }}",
+        "options": {}
+      },
+      "id": "1aff1304-f267-4498-8e9d-d5523d490ba7",
+      "name": "HTTP Request1",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        1280,
+        900
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "string": [
+            {
+              "value1": "={{ $json.payloads[1] }}",
+              "operation": "isNotEmpty"
+            }
+          ]
+        }
+      },
+      "id": "2b02834f-c3e3-4843-a759-ae9b4073f4b8",
+      "name": "IF",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [
+        1040,
+        840
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "string": [
+            {
+              "value1": "={{ $json.payloads[2] }}",
+              "operation": "isNotEmpty"
+            }
+          ]
+        }
+      },
+      "id": "3027559a-0e48-439d-a915-cb1904b105ed",
+      "name": "IF1",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [
+        1040,
+        1000
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://media.guilded.gg/webhooks/REDACTED",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ $json.payloads[2].body }}",
+        "options": {}
+      },
+      "id": "5fe0cf0e-e978-4e55-aabb-e6aca8d8196c",
+      "name": "HTTP Request2",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        1280,
+        1080
+      ]
+    },
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyHour"
+            }
+          ]
+        },
+        "feedUrl": "https://rsshub.app/pixiv/user/16582456"
+      },
+      "id": "1acff714-a0ad-49dd-9dbb-53058e30a45a",
+      "name": "RSS Feed Trigger",
+      "type": "n8n-nodes-base.rssFeedReadTrigger",
+      "typeVersion": 1,
+      "position": [
+        660,
+        720
+      ]
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Code": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "IF",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "IF1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "IF": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "IF1": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "RSS Feed Trigger": {
+      "main": [
+        [
+          {
+            "node": "Code",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "saveManualExecutions": true,
+    "callerPolicy": "workflowsFromSameOwner",
+    "executionOrder": "v1"
+  },
+  "versionId": "70fecdd7-b278-40ce-99f5-2e7705781e4d",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "f3e8646dc25bb703680f7fd48308e56289d71dc10dc3ea0c5d57254342b6a676"
+  },
+  "id": "38",
+  "tags": []
+}
