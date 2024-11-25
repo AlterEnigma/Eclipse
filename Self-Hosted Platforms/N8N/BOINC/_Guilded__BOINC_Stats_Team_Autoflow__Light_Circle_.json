@@ -1,0 +1,156 @@
+{
+  "name": "(Guilded) BOINC Stats Team Autoflow [Light Circle]",
+  "nodes": [
+    {
+      "parameters": {
+        "operation": "extractHtmlContent",
+        "extractionValues": {
+          "values": [
+            {
+              "key": "userStatsOdd",
+              "cssSelector": "tr.odd",
+              "returnArray": true
+            },
+            {
+              "key": "userStatsEven",
+              "cssSelector": "tr.even",
+              "returnArray": true
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "4cba67ef-feba-41ce-ab80-022155f90b2b",
+      "name": "HTML",
+      "type": "n8n-nodes-base.html",
+      "typeVersion": 1,
+      "position": [
+        1140,
+        380
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "function formatTeamStats(inputDescription) {\n  // Break lines at specific points\n  let formattedDescription = inputDescription.replace(/(\\d{1,3}(?:,\\d{3})*(?:\\.\\d+)?)/g, '**$1**');\n  formattedDescription = formattedDescription.replace('Comprising ', '\\nComprising ');\n  formattedDescription = formattedDescription.replace('+ ', '\\n+ ');\n  \n  return formattedDescription;\n}\n\nfunction extractNumberFromString(inputString) {\n  const matches = inputString.match(/\\d+/); // Matches the sequence of digits in the string\n  return matches ? matches[0] : null; // Returns the first match or null if no digits found\n}\n\nconst userStatsOdd8 = $('HTML').item.json.userStatsOdd[8]; // \"Position in Country X\"\nconst userStatsEven13 = $('HTML').item.json.userStatsEven[13]; // \"Number of members Y\"\n\nconst positionInCountry = extractNumberFromString(userStatsOdd8);\nconst numberOfMembers = extractNumberFromString(userStatsEven13);\n\n\nfunction convertTimestamp(inputTimestamp) {\n  const dateObj = new Date(inputTimestamp);\n  const options = { weekday: 'short', day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit', timeZone: 'GMT', timeZoneName: 'short' };\n  return dateObj.toLocaleString('en-US', options);\n}\n\nconst inputDescription = $('HTML').item.json.userStatsOdd[2];\nconst formattedTeamStats = formatTeamStats(inputDescription);\nconst inputTimestamp = DateTime.local();\nconst convertedTimestamp = convertTimestamp(inputTimestamp);\n\nconst textMod = String.prototype.concat(\"BOINC • \", convertedTimestamp);\n\n\nvar body = {\n\"embeds\": [\n{\ntitle: \"BOINC Team Statistics\",\nurl: \"https://www.boincstats.com/stats/-1/team/detail/9548af079fa99ee86885c0d5e2ced39b\",\ncolor: 2044507,\nfields: [\n{\nname: \"BOINC Cross Project IDentifier\",\nvalue: \"9548af079fa99ee86885c0d5e2ced39b\",\ninline: true\n},\n{\nname: \"Team\",\nvalue: \"Luminis Nobilite\",\ninline: true\n},\n{\nname: \"Country\",\nvalue: \"Mexico\",\ninline: true\n},\n{name: \"Team ID\",\nvalue: \"4886781458\",\ninline: true\n},\n{name: \"Number of members\",\nvalue: numberOfMembers,\ninline: true\n},\n{name: \"Position in Country\",\nvalue: positionInCountry,\ninline: true\n}\n],\n\"description\": formattedTeamStats,\nauthor: {\nname: \"Luminis Nobilite\",\nurl: \"https://github.com/LuminisNobilite\",\nicon_url: \"https://raw.githubusercontent.com/LightCircleLLC/Eclipse/refs/heads/main/Assets/Light%20Circle%20Official%20Branding/Light%20Circle%20Logo%20v1.png\"\n},\nfooter: {\ntext: textMod,\nicon_url: \"https://raw.githubusercontent.com/LightCircleLLC/Eclipse/refs/heads/main/Assets/Light%20Circle%20Official%20Branding/Eclipse%20Project%20Logo%20v1.png\"\n},\nthumbnail: {\nurl: \"https://raw.githubusercontent.com/LightCircleLLC/Eclipse/refs/heads/main/Assets/Light%20Circle%20Official%20Branding/Luminis%20Nobilite%20Logo%20v2.png\"\n}\n}\n]\n}\n\nreturn {body}"
+      },
+      "id": "e4c3fbe1-ec90-46e6-99bd-b1fd48b67aa8",
+      "name": "Code",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 1,
+      "position": [
+        1360,
+        380
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://media.guilded.gg/webhooks/REDACTED",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ $json.body }}",
+        "options": {}
+      },
+      "id": "fe20c327-ac7a-4e45-b148-16f8213b1a00",
+      "name": "HTTP Request - Guilded Webhook URL",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        1580,
+        380
+      ]
+    },
+    {
+      "parameters": {
+        "url": "https://www.boincstats.com/stats/-1/team/detail/9548af079fa99ee86885c0d5e2ced39b",
+        "options": {}
+      },
+      "id": "20a9b050-6954-4f91-b7f6-81f5b83222d4",
+      "name": "HTTP Request - BOINCStats Website",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        920,
+        380
+      ]
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {}
+          ]
+        }
+      },
+      "id": "2a650d86-606f-41ca-bace-887c8ef2e4c8",
+      "name": "Schedule Trigger",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        720,
+        380
+      ]
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "HTML": {
+      "main": [
+        [
+          {
+            "node": "Code",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request - Guilded Webhook URL",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request - BOINCStats Website": {
+      "main": [
+        [
+          {
+            "node": "HTML",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request - BOINCStats Website",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "saveManualExecutions": true,
+    "callerPolicy": "workflowsFromSameOwner",
+    "executionOrder": "v1"
+  },
+  "versionId": "22e194c5-77b6-4be8-9362-bbbd6eb21515",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "f3e8646dc25bb703680f7fd48308e56289d71dc10dc3ea0c5d57254342b6a676"
+  },
+  "id": "53",
+  "tags": []
+}
