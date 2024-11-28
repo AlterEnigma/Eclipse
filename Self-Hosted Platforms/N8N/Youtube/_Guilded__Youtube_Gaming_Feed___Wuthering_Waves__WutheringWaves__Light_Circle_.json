@@ -31,7 +31,7 @@
     {
       "parameters": {
         "mode": "runOnceForEachItem",
-        "jsCode": "return $json.feed.entry[0];"
+        "jsCode": "return $json.feed.entry[$itemIndex];"
       },
       "id": "de4ae48d-ea59-4052-b117-211313815bd7",
       "name": "Filter Code",
@@ -228,7 +228,7 @@
     "callerPolicy": "workflowsFromSameOwner",
     "executionOrder": "v1"
   },
-  "versionId": "944b7ea6-bf8c-41ff-9bd4-e8a057894d75",
+  "versionId": "a347ba7b-d31f-4a59-b12a-ccd83e06e7f9",
   "meta": {
     "templateCredsSetupCompleted": true,
     "instanceId": "f3e8646dc25bb703680f7fd48308e56289d71dc10dc3ea0c5d57254342b6a676"
