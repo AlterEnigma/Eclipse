@@ -94,7 +94,7 @@
     "callerPolicy": "workflowsFromSameOwner",
     "executionOrder": "v1"
   },
-  "versionId": "7ed0ab64-42eb-495e-9732-305467228efe",
+  "versionId": "1467da8f-2b05-4ed5-94e0-81b7a83faa63",
   "meta": {
     "templateCredsSetupCompleted": true,
     "instanceId": "f3e8646dc25bb703680f7fd48308e56289d71dc10dc3ea0c5d57254342b6a676"
