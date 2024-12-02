@@ -130,24 +130,6 @@
         1660,
         520
       ]
-    },
-    {
-      "parameters": {
-        "method": "POST",
-        "url": "https://discord.com/api/webhooks/REDACTED",
-        "sendBody": true,
-        "specifyBody": "json",
-        "jsonBody": "={{ JSON.stringify({ content: $json.body.embeds[0].url }) }}",
-        "options": {}
-      },
-      "id": "162fcbe8-e51b-4be2-8286-1d2f10ec30e8",
-      "name": "HTTP Request (Discord)",
-      "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.2,
-      "position": [
-        1660,
-        720
-      ]
     }
   ],
   "pinData": {},
@@ -168,11 +150,6 @@
         [
           {
             "node": "HTTP Request (Guilded)",
-            "type": "main",
-            "index": 0
-          },
-          {
-            "node": "HTTP Request (Discord)",
             "type": "main",
             "index": 0
           }
@@ -209,7 +186,7 @@
     "callerPolicy": "workflowsFromSameOwner",
     "executionOrder": "v1"
   },
-  "versionId": "9f66d6b4-180e-49e4-81c6-4575788d4062",
+  "versionId": "adc972e1-b3b8-4aeb-9c3a-edd8e5e86937",
   "meta": {
     "templateCredsSetupCompleted": true,
     "instanceId": "f3e8646dc25bb703680f7fd48308e56289d71dc10dc3ea0c5d57254342b6a676"
