@@ -52,12 +52,12 @@
           }
         }
       },
-      "id": "1de7ee0d-37ba-4219-b01f-5e30164591f2",
+      "id": "939890ad-7059-4432-8ebd-b2acde63119c",
       "name": "HTTP Request (Guilded)",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.1,
       "position": [
-        1280,
+        1320,
         780
       ]
     }
@@ -94,7 +94,7 @@
     "callerPolicy": "workflowsFromSameOwner",
     "executionOrder": "v1"
   },
-  "versionId": "1380a393-be04-4e48-9ca5-953eb4b3a576",
+  "versionId": "b6c4e54f-cf94-4e9f-94ce-cbc4e09f6ec6",
   "meta": {
     "templateCredsSetupCompleted": true,
     "instanceId": "f3e8646dc25bb703680f7fd48308e56289d71dc10dc3ea0c5d57254342b6a676"
