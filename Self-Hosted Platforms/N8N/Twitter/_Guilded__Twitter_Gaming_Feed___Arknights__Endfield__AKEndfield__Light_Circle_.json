@@ -1,0 +1,104 @@
+{
+  "name": "(Guilded) Twitter Gaming Feed - Arknights: Endfield @AKEndfield [Light Circle]",
+  "nodes": [
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "function convertTimestamp(inputTimestamp) {\n  const dateObj = new Date(inputTimestamp);\n  const options = {\n    weekday: 'short',\n    day: '2-digit',\n    month: 'short',\n    year: 'numeric',\n    hour: '2-digit',\n    minute: '2-digit',\n    second: '2-digit',\n    timeZone: 'GMT',\n    timeZoneName: 'short',\n  };\n  return dateObj.toLocaleString('en-US', options);\n}\n\nconst inputTimestamp = $('RSS Feed Trigger').first().json.pubDate;\nconst convertedTimestamp = convertTimestamp(inputTimestamp);\n\nconst regexPattern = /@/i;\nconst creator = $('RSS Feed Trigger').first().json.creator;\nconst iconUrl = \"https://raw.githubusercontent.com/LightCircleLLC/Eclipse/refs/heads/main/Assets/Twitter/Twitter%20Gaming%20Feeds/Avatars/%40AKEndfield_400x400.jpg\";\nconst inputContent = $('RSS Feed Trigger').first().json.content;\nconst regex = /<img\\s+[^>]*src=\"([^\"]+)\"[^>]*>/g;\nconst match = regex.exec(inputContent);\nconst nameInit = `Arknights: Endfield (${creator})`;\nconst textInit = String.prototype.concat('Twitter • ', convertedTimestamp);\n\nlet descriptionHyperlinked = $('RSS Feed Trigger').first().json['title'];\n\n// Fix the incorrect CDN URL pattern\nfunction fixMalformedUrl(url) {\n  // Correct the missing colon in 'https//'\n  url = url.replace(\"https//\", \"https://\");\n\n  // Find and extract only the correct CDN URL\n  const cdnUrlMatch = url.match(/https:\\/\\/cdn\\.xcancel\\.com[^\\s\"]+/);\n  return cdnUrlMatch ? cdnUrlMatch[0] : url; // Return the correct part if found\n}\n\n// Use a regular expression to search for URLs within the description field\nconst urlRegex = /(https?:\\/\\/[^\\s]+)/g;\ndescriptionHyperlinked = descriptionHyperlinked.replace(urlRegex, '[$1]($1)');\n\n// Regular expression pattern to match hashtags\nconst hashtagRegex = /(^|\\s)(#[^\\s]+)/g;\nconst hashtags = descriptionHyperlinked.match(hashtagRegex);\nif (hashtags) {\n  hashtags.forEach(hashtag => {\n    const cleanHashtag = hashtag.trim();\n    const hashtagWithoutSharp = cleanHashtag.substring(1);\n    const hashtagUrl = `https://www.twitter.com/hashtag/${hashtagWithoutSharp.toLowerCase()}`;\n    const hashtagLink = `[${cleanHashtag}](${hashtagUrl})`;\n    descriptionHyperlinked = descriptionHyperlinked.replace(cleanHashtag, hashtagLink);\n  });\n}\n\n// Regular expression pattern to match @ mentions\nconst mentionRegex = /(^|\\s)@(\\w+)/g;\nconst mentions = descriptionHyperlinked.match(mentionRegex);\nif (mentions) {\n  mentions.forEach(mention => {\n    const mentionWithoutSpace = mention.replace(/\\s/g, '');\n    const username = mentionWithoutSpace.substring(1);\n    const mentionUrl = `https://twitter.com/${username}`;\n    const mentionLink = ` [@${username}](${mentionUrl})`;\n    descriptionHyperlinked = descriptionHyperlinked.replace(mention, mentionLink);\n  });\n}\n\nif (match && match[1]) {\n  // Fix the malformed URL and extract the correct CDN URL\n  const imgSrc = fixMalformedUrl(match[1]);\n\n  let embed = {\n    color: 1942002,\n    author: {\n      name: nameInit,\n      url: $(\"RSS Feed Trigger\").first().json.link,\n      icon_url: iconUrl,\n    },\n    url: $(\"RSS Feed Trigger\").first().json['link'],\n    image: {\n      url: imgSrc,\n    },\n    footer: {\n      text: textInit,\n      icon_url: 'https://raw.githubusercontent.com/LightCircleLLC/Eclipse/main/Assets/Icons/Guilded/Guilded%20-%20Gold%20Twitter%20Icon%20v1.png',\n    },\n  };\n  embed.description = descriptionHyperlinked;\n  const body = {\n    embeds: [embed],\n  };\n  return { body };\n} else {\n  let embed = {\n    color: 1942002,\n    author: {\n      name: nameInit,\n      url: $(\"RSS Feed Trigger\").first().json.link,\n      icon_url: iconUrl,\n    },\n    url: $(\"RSS Feed Trigger\").first().json['link'],\n    footer: {\n      text: textInit,\n      icon_url: 'https://raw.githubusercontent.com/LightCircleLLC/Eclipse/main/Assets/Icons/Guilded/Guilded%20-%20Gold%20Twitter%20Icon%20v1.png',\n    },\n  };\n  embed.description = descriptionHyperlinked;\n  const body = {\n    embeds: [embed],\n  };\n  return { body };\n}\n"
+      },
+      "id": "d4ee617c-86d6-4cbd-802a-771af7773d75",
+      "name": "Code",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 1,
+      "position": [
+        1120,
+        720
+      ]
+    },
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyHour",
+              "minute": 5
+            }
+          ]
+        },
+        "feedUrl": "http://REDACTED/i/?a=rss&get=f_27&state=3"
+      },
+      "id": "2751fe7a-b6f6-411a-bbd9-380defd9eacc",
+      "name": "RSS Feed Trigger",
+      "type": "n8n-nodes-base.rssFeedReadTrigger",
+      "typeVersion": 1,
+      "position": [
+        940,
+        720
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://media.guilded.gg/webhooks/REDACTED",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ $json.body }}",
+        "options": {
+          "batching": {
+            "batch": {
+              "batchSize": 10,
+              "batchInterval": 10000
+            }
+          }
+        }
+      },
+      "id": "2c5901f1-8de4-4a8c-947c-b2c673edd266",
+      "name": "HTTP Request (Guilded)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        1300,
+        720
+      ]
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Code": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request (Guilded)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "RSS Feed Trigger": {
+      "main": [
+        [
+          {
+            "node": "Code",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "timezone": "America/Mexico_City",
+    "saveManualExecutions": false,
+    "callerPolicy": "workflowsFromSameOwner",
+    "executionOrder": "v1"
+  },
+  "versionId": "3d5aae28-d6c4-44db-888c-ecbf5655e062",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "f3e8646dc25bb703680f7fd48308e56289d71dc10dc3ea0c5d57254342b6a676"
+  },
+  "id": "yRnHP7nrwSXobNK8",
+  "tags": []
+}
