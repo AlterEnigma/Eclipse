@@ -50,7 +50,7 @@
     {
       "parameters": {
         "mode": "runOnceForEachItem",
-        "jsCode": "function convertTimestamp(inputTimestamp) {\n  const dateObj = new Date(inputTimestamp);\n  const options = { weekday: 'short', day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit', timeZone: 'GMT', timeZoneName: 'short' };\n  return dateObj.toLocaleString('en-US', options);\n}\n\nconst inputTimestamp = $('RSS Feed Trigger').item.json.pubDate;\nconst convertedTimestamp = convertTimestamp(inputTimestamp);\n\n\nvar body = {\n  embeds: [\n    {\n      color: 14837107,\n      author: {\n        name: 'Azur Lane',\n        url: 'https://azurlane.yo-star.com',\n        icon_url:\n          'https://pbs.twimg.com/profile_images/1651413354660130817/K9iOcejt_400x400.jpg',\n      },\n      title: $('RSS Feed Trigger').item.json.title,\n      url: $('RSS Feed Trigger').item.json.link,\n      image: {\n        url: $('HTML - Extract OG Img URL Metaproperty').item.json.og_imgURL,\n      },\n      footer: {\n        text: String.prototype.concat(\"Yande.re • \", convertedTimestamp, \" • \", $('RSS Feed Trigger').item.json.author),\n        icon_url: 'https://cdn.myanimelist.net/images/characters/8/269729.jpg',\n      }\n    }\n  ]\n};\n\nreturn { body };"
+        "jsCode": "function convertTimestamp(inputTimestamp) {\n  const dateObj = new Date(inputTimestamp);\n  const options = { weekday: 'short', day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit', timeZone: 'GMT', timeZoneName: 'short' };\n  return dateObj.toLocaleString('en-US', options);\n}\n\nconst inputTimestamp = $('RSS Feed Trigger').first().json.pubDate;\nconst convertedTimestamp = convertTimestamp(inputTimestamp);\n\n\nvar body = {\n  embeds: [\n    {\n      color: 14837107,\n      author: {\n        name: 'Azur Lane',\n        url: 'https://azurlane.yo-star.com',\n        icon_url:\n          'https://pbs.twimg.com/profile_images/1651413354660130817/K9iOcejt_400x400.jpg',\n      },\n      title: $('RSS Feed Trigger').first().json.title,\n      url: $('RSS Feed Trigger').first().json.link,\n      image: {\n        url: $('HTML - Extract OG Img URL Metaproperty').first().json.og_imgURL,\n      },\n      footer: {\n        text: String.prototype.concat(\"Yande.re • \", convertedTimestamp, \" • \", $('RSS Feed Trigger').first().json.author),\n        icon_url: 'https://cdn.myanimelist.net/images/characters/8/269729.jpg',\n      }\n    }\n  ]\n};\n\nreturn { body };"
       },
       "id": "ed5e1c33-d015-4c15-8568-e4655ebb9ab4",
       "name": "Main Driver Code",
@@ -153,7 +153,7 @@
     "callerPolicy": "workflowsFromSameOwner",
     "executionOrder": "v1"
   },
-  "versionId": "823f6261-5d33-4c08-93a5-879ff8c01fe0",
+  "versionId": "5098d778-931f-4bc4-9698-9e61cbff4723",
   "meta": {
     "templateCredsSetupCompleted": true,
     "instanceId": "f3e8646dc25bb703680f7fd48308e56289d71dc10dc3ea0c5d57254342b6a676"
